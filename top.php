@@ -22,8 +22,8 @@ $data = $st->fetchAll();
         <div class=login>
             <?
         session_start();
-        if (isset($_SESSION["user"])) {
-            echo '<a>ようこそ' . h($_SESSION["user"]) . 'さん！</a>';
+        if (isset($_SESSION["username"])) {
+            echo '<a>ようこそ' . h($_SESSION["username"]) . 'さん！</a>';
             echo '<a href="logout.php">ログアウト</a>';
         } else {
             echo '<a href="login_form.php">ログイン</a>';
