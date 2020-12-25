@@ -33,9 +33,9 @@ $data = $st->fetchAll();
         <h1>選択</h1>
         <form action="matching.php" method="GET">
             <input type="radio" name="mode" value="0">
-            <label for="0">コンパス</label>
+            <label for="0">コンパス(mode=0)</label>
             <input type="radio" name="mode" value="1" checked>
-            <label for="1">定規</label>
+            <label for="1">定規(mode1)</label>
             <input type="submit" value="マッチング開始">
         </form>
     </body>
