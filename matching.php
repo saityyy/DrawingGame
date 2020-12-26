@@ -1,14 +1,13 @@
-<?
+<?php
 session_start();
-$_SESSION["mode"]=$_GET["mode"];
-$mode=$_SESSION["mode"];
-$name=$_SESSION["username"];
-$id=$_SESSION["id"];
+$_SESSION["mode"] = $_GET["mode"];
+$mode = $_SESSION["mode"];
+$name = $_SESSION["username"];
+$id = $_SESSION["id"];
 $pdo = new PDO("sqlite:data.sqlite");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$st = $pdo->prepare("update user set mode=".$mode." where id=".$id.";");
-$st = $pdo->prepare("update user set partnerID=0 where id=?;");
-$st->execute(array($id));
+$st = $pdo->query("update user set mode=" . $mode . " where id=" . $id . ";");
+$st = $pdo->query("update user set partnerID=0 where id=" . $id . ";");
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -30,43 +29,59 @@ $st->execute(array($id));
             $pdo = new PDO("sqlite:data.sqlite");
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
+            $result = false;
             # mode=0 -> マッチング待ちのmode=1ユーザーを探索
             if ($mode == 0) {
-                $st = $pdo->query("select * from user where partnerID=" . $id . ";");
                 $st = $pdo->query("select * from user where mode=1 and partnerID=0;");
                 $data = $st->fetchAll();
-                if (count($data) == 0) $result = false;
-                else {
-                    $result = true;
+                if (count($data) > 0) {
+                    #echo "console.log(" . count($data) . ");";
                     $rd = rand(0, count($data) - 1);
-                    $selectedID = $data[$rd]["id"]; //マッチング相手のID
-                    //相手のパートナーIDの欄を自分のIDにする
-                    $st = $pdo->query("update user set partnerID=" . $id . "where id=" . $selectedID . ";");
+                    $partnerID = $data[$rd]["id"]; //マッチング相手のID
+                    #echo "console.log(" . $partnerID . ");";
                     //自分のパートナーIDの欄を相手のIDにする
-                    $st = $pdo->query("update user set partnerID=" . $selectedID . "where id=" . $id . ";");
+                    $st = $pdo->query("update user set partnerID=" . $partnerID . " where id=" . $id . ";");
                 }
+                $st = $pdo->query("select * from user where mode=1 and partnerID=" . $id . ";");
+                $data = $st->fetchAll();
+                if (count($data) != 0) {
+                    $result = true;
+                    $partnerName = $data[0]["name"];
+                }
+                #mode=1
             } else {
-                # mode=1 -> マッチングされたかチェック
-                # マッチングした相手を探す
                 $st = $pdo->query("select * from user where partnerID=" . $id . ";");
                 $data = $st->fetchAll();
-                if (count($data) == 0) $result = false;
-                else {
+                if (count($data) != 0) {
+                    echo "console.log(" . $data[0]["partnerID"] . ");";
+                    $partnerID = $data[0]["id"]; //マッチング相手のID
+                    $partnerName = $data[0]["name"];
+                    //自分のパートナーIDの欄を相手のIDにする
+                    $st = $pdo->query("update user set partnerID=" . $partnerID . " where id=" . $id . ";");
                     $result = true;
-                    $selectedID = $data[0]["id"];
                 }
             }
-            if ($result) { ?>
-            console.log(<?php echo '"' . $id . ' , ' . $selectedID . '"'; ?>);
-            <?php } else { ?>
+            if ($show) {
+                if ($result) { ?>
+            console.log(<?php echo '"' . $id . ' , ' . $partnerID . '"'; ?>);
+            console.log(<?php echo '"' . $name . ' , ' . $partnerName . '"'; ?>);
+            console.log("マッチングに成功しました");
+            <?php
+                    #header("Location:drawing.php");
+                    #exit;
+                } else { ?>
             console.log("not found");
-            <?php } ?>
+            <?php }
+                $show = false;
+            } ?>
         }, 1000);
-        <?php if ($result) {
+        <?php
+        $show = true;
+        if (false) {
             $pdo = new PDO("sqlite:data.sqlite");
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             $st = $pdo->prepare("update user set partnerID=-1 where id=" . $id . ";");
-            $st = $pdo->prepare("update user set partnerID=-1 where id=" . $selectedID . ";");
+            $st = $pdo->prepare("update user set partnerID=-1 where id=" . $partnerID . ";");
         } ?>
         </script>
     </body>
