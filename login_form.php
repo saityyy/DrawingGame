@@ -8,14 +8,14 @@ if (isset($_GET["username"]) && isset($_GET["password"])) {
   $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
   $st = $pdo->prepare("select * from user where name==?;");
   $st->execute(array($username));
-  $user_on_db = $st->fetch();
+  $data = $st->fetch();
 
-  if (!$user_on_db) {
+  if (!$data) {
     $result = "指定されたユーザーが存在しません。";
-  } else if ($user_on_db["password"] == $password) {
+  } else if ($data["password"] == $password) {
     echo $username;
     $_SESSION["username"] = $username;
-    $_SESSION["id"] = $user_on_db["id"];
+    $_SESSION["id"] = $data["id"];
     header("Location:top.php");
     exit;
   } else {

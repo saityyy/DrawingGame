@@ -1,25 +1,28 @@
 <?php
 session_start();
-if (isset($_GET["username"]) && isset($_GET["passwd"])) {
-  $name = $_GET["username"];
-  $password = $_GET["passwd"];
-
-  $pdo = new PDO("sqlite:myblog.sqlite");
+if ($_GET["username"] && $_GET["password"]) {
+  $username = $_GET["username"];
+  $password = $_GET["password"];
+  $pdo = new PDO("sqlite:data.sqlite");
   $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
   $st = $pdo->prepare("select * from user where name==?;");
-  $st->execute(array($name));
-  $user_on_db = $st->fetch();
+  $st->execute(array($username));
+  $data = $st->fetch();
 
-  if (!$user_on_db) {
-    $result = "指定されたユーザーが存在しません。";
-  } else if ($user_on_db["password"] == $password) {
-    $_SESSION["user"] = $username;
-    $_SESSION["id"] = $user_on_db["id"];
+  if (!$data) {
+    $sql_query = "insert into user(name,password,mode,partnerID) values('" . $username . "','" . $password . "',0,-1);";
+    $st = $pdo->query($sql_query);
+    $st = $pdo->query("select max(id) from user;");
+    $data = $st->fetch();
+    $_SESSION["username"] = $username;
+    $_SESSION["id"] = $data[0];
     header("Location:top.php");
     exit;
   } else {
-    $result = "パスワードが違います。";
+    $result = "同じ名前の人がいます";
   }
+} else {
+  $result = "ユーザー名とパスワードを入力してください";
 }
 ?>
 <!DOCTYPE html>
@@ -33,14 +36,16 @@ if (isset($_GET["username"]) && isset($_GET["passwd"])) {
     <body>
         <div class=article>
             <h2>ユーザ名とパスワードを入力してください</h2>
-            <form action="newac_submit.php" method="get">
+            <form action="newac_form.php" method="get">
                 <p>ユーザ名</p>
                 <input type="text" name="username">
                 <p>パスワード</p>
-                <input type="password" name="passwd">
+                <input type="password" name="password">
                 <input type="submit" value="送信">
             </form>
-            <p><?$result?></p>
+            <p>
+                <?php echo $result; ?>
+            </p>
         </div>
     </body>
 
