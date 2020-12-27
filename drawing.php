@@ -21,32 +21,36 @@
         var mode = 0; //0:curve 1:line
         var clickX = -1;
         var clickY = -1;
-        var turn_flag=true;
+        var turn_flag = true;
         var draw_stack = [];
         var drawLines = [];
         var drawCircles = [];
-        var teamID=1;
+        var teamID = 1;
         var stage = acgraph.create('stage');
         var conn = new WebSocket('ws://localhost:8080');
-        conn.onopen = function (e) {
+        conn.onopen = function(e) {
             console.log("connection for comment established!");
         };
-        conn.onmessage = function (e) {
-            if(teamID==e.data[0]){
+        conn.onmessage = function(e) {
+            if (teamID == e.data[0]) {
                 console.log(e.data);
             }
         };
         var conn = new WebSocket('ws://localhost:8080');
+
         function send(text) {
             conn.send(text);
         };
-        function c(){
-            turn_flag=false;
-            send([teamID,mode]);
+
+        function c() {
+            turn_flag = false;
+            send([teamID, mode]);
         }
+
         function dist(dx, dy) {
             return parseInt(Math.sqrt(dx * dx + dy * dy));
         }
+
         function Line(x1, y1, x2, y2) {
             var linePath = acgraph.path();
             linePath.parent(stage);
@@ -71,11 +75,13 @@
             stage.rect(0, 0, 900, 600).fill('white');
             draw(drawLines, drawCircles);
         }
-        function fetch(){
+
+        function fetch() {
             //drawLines,drawCircles
             drawLines.push([100, 500, 700, 500]);
             drawLines.push([100, 500, 600, 100]);
         }
+
         function judge() {
             //DBから取ってきた正解データと見比べる。
             //各問題に対する満たすべき条件で正誤判定する。

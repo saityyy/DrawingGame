@@ -6,9 +6,9 @@ use Ratchet\WebSocket\WsServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 
-    require 'vendor/autoload.php';
-    $ws = new WsServer(new MyChat);
+require 'vendor/autoload.php';
+$ws = new WsServer(new MyChat);
 
-    // Make sure you're running this as root
-    $server = IoServer::factory(new HttpServer($ws),8080);
-    $server->run();
+// Make sure you're running this as root
+$server = IoServer::factory(new HttpServer($ws), 80);
+$server->run();
