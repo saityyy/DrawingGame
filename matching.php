@@ -1,6 +1,6 @@
 <?php
 session_start();
-$_SESSION["mode"] = $_GET["mode"];
+if (isset($_GET["mode"])) $_SESSION["mode"] = $_GET["mode"];
 $mode = $_SESSION["mode"];
 $name = $_SESSION["username"];
 $id = $_SESSION["id"];
@@ -19,65 +19,87 @@ $st = $pdo->query("update user set partnerID=0 where id=" . $id . ";");
 
     <body>
 
-        <h1>マッチング中</h1>
+        <h1></h1>
+        <h2></h2>
+        <a href="http://localhost:8080/kadai/DrawingGame/matching.php"></a>
+        <p id="partner"></p>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script type="text/javascript">
         var mode = <?php echo $mode; ?>;
         var id = <?php echo $id; ?>;
-        var conn = new WebSocket('ws://c6c23055028b.ngrok.io');
-        var result;
-        conn.onmessage = function(e) {
-            console.log(e.data);
-        };
-        conn.onopen = function(e) {
-            console.log("connection for comment established!");
-            if (result) {
-                conn.send("success");
-                console.log("send_success");
-            }
-        };
+        var name = <?php echo '"' . $name . '"'; ?>;
+        var conn = new WebSocket('ws://localhost:80');
+
+        function transition(sec) {
+            setTimeout(function() {
+                var nextURL = location.href.split('/');
+                nextURL[5] = "drawing.php";
+                nextURL = nextURL.join("/");
+                console.log(nextURL);
+                window.location.href = nextURL;
+            }, sec * 1000);
+        }
+        var result = false;
         <?php
-        $result = false;
-        # mode=0 -> マッチング待ちのmode=1ユーザーを探索
         if ($mode == 0) {
-            echo "console.log(" . count($data) . ");";
             $st = $pdo->query("select * from user where mode=1 and partnerID=0;");
             $data = $st->fetchAll();
             if (count($data) > 0) {
                 $rd = rand(0, count($data) - 1);
                 $partnerID = $data[$rd]["id"]; //マッチング相手のID
                 $partnerName = $data[$rd]["name"];
-                #echo "console.log(" . $partnerID . ");";
                 $st = $pdo->query("update user set partnerID=" . $partnerID . " where id=" . $id . ";");
                 $st = $pdo->query("update user set partnerID=" . $id . " where id=" . $partnerID . ";");
-                $result = true;
+                $_SESSION["partnerID"] = $partnerID;
+                $_SESSION["partnerName"] = $partnerName;
         ?>
+        result = true;
         console.log("success");
-        var result = <?php echo $result; ?>;
-        <?php
+        var partnerID = <?php echo $partnerID; ?>;
+        var partnerName = <?php echo '"' . $partnerName . '"'; ?>;
+        conn.onmessage = function(e) {
+            var temp = e.data.split(",");
+            if (temp[0] == id) {
+                $("h1").text("マッチングに成功しました");
+                $("h2").text("開始まであと３秒");
+                $("p").text("パートナー:" + temp[2]);
+                transition(3);
             }
+        };
+        conn.onopen = function(e) {
+            console.log("connection for comment established!");
+            if (result) {
+                conn.send([partnerID, id, name]);
+                console.log("send_success");
+            } else {
+                $("h1").text("パートナーが見つかりませんでした");
+                $("a").text("もう一度探す");
+            }
+        };
+        <?php
+            } ?>
+        $("h1").text("パートナーが見つかりませんでした");
+        $("a").text("もう一度探す");
+        <?php
             #mode=1
         } else { ?>
-        var result = <?php echo $result; ?>
+        $("h1").text("マッチング中");
         conn.onmessage = function(e) {
-            console.log("receive_success");
-            console.log(e.data);
+            var temp = e.data.split(",");
+            if (temp[0] == id) {
+                $("h1").text("マッチングに成功しました");
+                $("h2").text("開始まであと３秒");
+                $("p").text("パートナー:" + temp[2]);
+                console.log("receive_success");
+                conn.send([temp[1], id, name]);
+                transition(3);
+            }
         };
         conn.onopen = function(e) {
             console.log("connection for comment established!");
         };
         <?php
-        }
-        if ($result) {
-        ?>
-        console.log(<?php echo '"' . $id . ' , ' . $partnerID . '"'; ?>);
-        console.log(<?php echo '"' . $name . ' , ' . $partnerName . '"'; ?>);
-        console.log("マッチングに成功しました");
-        <?php
-            #header("Location:drawing.php");
-            #exit;
-        } else { ?>
-        console.log("not found");
-        <?php } ?>
+        } ?>
         </script>
     </body>
 
