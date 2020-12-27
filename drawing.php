@@ -27,7 +27,7 @@
         var drawCircles = [];
         var teamID = 1;
         var stage = acgraph.create('stage');
-        var conn = new WebSocket('ws://localhost:8080');
+        var conn = new WebSocket('ws://localhost:80');
         conn.onopen = function(e) {
             console.log("connection for comment established!");
         };
@@ -36,7 +36,7 @@
                 console.log(e.data);
             }
         };
-        var conn = new WebSocket('ws://localhost:8080');
+        var conn = new WebSocket('ws://localhost:80');
 
         function send(text) {
             conn.send(text);

@@ -23,9 +23,19 @@ $st = $pdo->query("update user set partnerID=0 where id=" . $id . ";");
         <script type="text/javascript">
         var mode = <?php echo $mode; ?>;
         var id = <?php echo $id; ?>;
-        var conn = new WebSocket('ws://localhost:80');
+        var conn = new WebSocket('ws://c6c23055028b.ngrok.io');
+        var result;
+        conn.onmessage = function(e) {
+            console.log(e.data);
+        };
+        conn.onopen = function(e) {
+            console.log("connection for comment established!");
+            if (result) {
+                conn.send("success");
+                console.log("send_success");
+            }
+        };
         <?php
-
         $result = false;
         # mode=0 -> マッチング待ちのmode=1ユーザーを探索
         if ($mode == 0) {
@@ -40,20 +50,9 @@ $st = $pdo->query("update user set partnerID=0 where id=" . $id . ";");
                 $st = $pdo->query("update user set partnerID=" . $partnerID . " where id=" . $id . ";");
                 $st = $pdo->query("update user set partnerID=" . $id . " where id=" . $partnerID . ";");
                 $result = true;
-
         ?>
         console.log("success");
         var result = <?php echo $result; ?>;
-        conn.onmessage = function(e) {
-            console.log(e.data);
-        };
-        conn.onopen = function(e) {
-            console.log("connection for comment established!");
-            if (result) {
-                conn.send("success");
-                console.log("send_success");
-            }
-        };
         <?php
             }
             #mode=1
