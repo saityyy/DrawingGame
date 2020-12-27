@@ -1,3 +1,16 @@
+<?php
+session_start();
+if (isset($_GET["partnerID"]) && isset($_GET["partnerName"])) {
+    $_SESSION["partnerID"] = $_GET["partnerID"];
+    $_SESSION["partnerName"] = $_GET["partnerName"];
+}
+$partnerID = $_SESSION["partnerID"];
+$partnerName = $_SESSION["partnerName"];
+$mode = $_SESSION["mode"];
+$name = $_SESSION["username"];
+$id = $_SESSION["id"];
+$_SESSION["QNum"] = 1;
+?>
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -7,6 +20,12 @@
     </head>
 
     <body>
+        <?php
+    echo '<p>id : ' . $id . '</p>';
+    echo '<p>name : ' . $name . '</p>';
+    echo '<p>partnerID : ' . $partnerID . '</p>';
+    echo '<p>partnerName : ' . $partnerName . '</p>';
+    ?>
         <h2>二等分線を引け</h2>
         <div id="stage" style="width:900px;height:600px;border:solid 1px #000"></div>
         <div id=correctJudge>
@@ -17,34 +36,36 @@
         <input type="button" value="ターン交代" onclick="c()">
         <script src="https://cdn.anychart.com/js/latest/graphics.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-        <script>
-        var mode = 0; //0:curve 1:line
+        <script type="text/javascript">
+        var mode = <?php echo $mode; ?>;
+        var id = <?php echo $id; ?>;
+        var partnerID = <?php echo $partnerID; ?>;
         var clickX = -1;
         var clickY = -1;
         var turn_flag = true;
         var draw_stack = [];
         var drawLines = [];
         var drawCircles = [];
-        var teamID = 1;
         var stage = acgraph.create('stage');
         var conn = new WebSocket('ws://localhost:80');
+        var ws_flag = false;
         conn.onopen = function(e) {
             console.log("connection for comment established!");
+            ws_flag = true;
         };
         conn.onmessage = function(e) {
-            if (teamID == e.data[0]) {
+            if (e.data == partnerID) {
                 console.log(e.data);
+                turn_flag = true;
             }
         };
-        var conn = new WebSocket('ws://localhost:80');
-
-        function send(text) {
-            conn.send(text);
-        };
+        //var conn = new WebSocket('ws://localhost:80');
 
         function c() {
-            turn_flag = false;
-            send([teamID, mode]);
+            if (ws_flag) {
+                turn_flag = false;
+                conn.send(id);
+            }
         }
 
         function dist(dx, dy) {

@@ -28,14 +28,13 @@ $st = $pdo->query("update user set partnerID=0 where id=" . $id . ";");
         var mode = <?php echo $mode; ?>;
         var id = <?php echo $id; ?>;
         var name = <?php echo '"' . $name . '"'; ?>;
+        var nextURL = location.href.split('matching.php');
+        nextURL = nextURL[0] + "drawing.php";
+        console.log(nextURL);
         var conn = new WebSocket('ws://localhost:80');
 
         function transition(sec) {
             setTimeout(function() {
-                var nextURL = location.href.split('/');
-                nextURL[5] = "drawing.php";
-                nextURL = nextURL.join("/");
-                console.log(nextURL);
                 window.location.href = nextURL;
             }, sec * 1000);
         }
@@ -86,12 +85,18 @@ $st = $pdo->query("update user set partnerID=0 where id=" . $id . ";");
         $("h1").text("マッチング中");
         conn.onmessage = function(e) {
             var temp = e.data.split(",");
+            console.log("temp : " + temp);
             if (temp[0] == id) {
                 $("h1").text("マッチングに成功しました");
                 $("h2").text("開始まであと３秒");
                 $("p").text("パートナー:" + temp[2]);
                 console.log("receive_success");
                 conn.send([temp[1], id, name]);
+                var xhr = new XMLHttpRequest();
+                nextURL += "?partnerID=" + encodeURIComponent(temp[1]);
+                nextURL += "&partnerName=" + encodeURIComponent(temp[2]);
+                xhr.open("GET", nextURL);
+                xhr.send(null);
                 transition(3);
             }
         };
