@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+    <head>
+        <meta charset="utf-8">
+        <title>drawing</title>
+    </head>
+
+    <body>
+        <div class="login">
+        </div>
+        <div class="newac">
+        </div>
+        <div class="RealTimeNum">
+        </div>
+        <h1>選択</h1>
+        <form action="backend/matching.php" method="GET">
+            <input type="radio" name="mode" value="0">
+            <label for="0">コンパス(mode=0)</label>
+            <input type="radio" name="mode" value="1" checked>
+            <label for="1">定規(mode1)</label>
+            <input type="submit" value="マッチング開始">
+        </form>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script>
+            //responseData=["name"(not login->0),"registNum","playNum","waitMatchingNum"];
+            var name;
+            var registNum
+            var playNum;
+            var waitMatchingNum;
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'backend/top.php', true);
+            xhr.responseType = 'json';
+            xhr.send(null);
+            xhr.onreadystatechange = function () {
+                if (xhr.status == 200 && xhr.readyState == 4) {
+                    var res = xhr.response;
+                    console.log(res);
+                    name = res["name"];
+                    registNum = res["registNum"];
+                    playNum = res["playNum"];
+                    waitMatchingNum = res["waitMatchingNum"];
+                    if (name == 0) $(".login").html('<a href="login_form.html">ログイン</a>');
+                    else $(".login").append('<p>ようこそ' + name + 'さん</p>');
+                    $(".login").append('<p><a href="backend/logout.php">ログアウト</a></p>');
+                    $(".newac").append('<p><a href="newac_form.html">新規アカウント</a></p>');
+                }
+            };
+        </script>
+    </body>
+
+</html>
