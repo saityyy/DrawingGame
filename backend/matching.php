@@ -5,6 +5,11 @@ if (isset($_GET["mode"])) {
     header('Location: ../matching.html');
     exit;
 }
+if (isset($_GET["partnerID"]) && isset($_GET["partnerName"])) {
+    $_SESSION["partnerID"] =  $_GET["partnerID"];
+    $_SESSION["partnerName"] = $_GET["partnerName"];
+    exit;
+}
 header('Content-Type: application/json; charset=utf-8');
 $mode = $_SESSION["mode"];
 $name = $_SESSION["username"];
@@ -14,6 +19,8 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $st = $pdo->query("update user set mode=" . $mode . " where id=" . $id . ";");
 $st = $pdo->query("update user set partnerID=0 where id=" . $id . ";");
 
+$partnerID = -100;
+$partnerName = -100;
 if ($mode == 0) {
     $st = $pdo->query("select * from user where mode=1 and partnerID=0;");
     $data = $st->fetchAll();
@@ -29,14 +36,8 @@ if ($mode == 0) {
             ";");
         $_SESSION["partnerID"] = $partnerID;
         $_SESSION["partnerName"] = $partnerName;
-    } else {
-        $partnerID = -100;
-        $partnerName = -100;
     }
-} else {
-    $partnerID = -100;
-    $partnerName = -100;
 }
-$array = ['mode' => $mode, 'id' => $id, 'username' => $name, 'partnerID' => $partnerID, 'partnerName' => $partnerName];
+$array = ['mode' => $mode, 'id' => $id, 'name' => $name, 'partnerID' => $partnerID, 'partnerName' => $partnerName];
 $json = json_encode($array);
 echo $json;
