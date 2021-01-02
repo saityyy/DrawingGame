@@ -21,7 +21,7 @@ if ($request === "iniSet") {
        'partnerID' => $partnerID, 
        'partnerName' => $partnerName
     ];*/
-} else if ($request === "iniSetXY") {
+} else if ($request === "iniSetFigures") {
     /*[
         'drawLines'=>$drawLines,
         'drawCircles=>$drawCircles
