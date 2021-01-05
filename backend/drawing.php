@@ -1,7 +1,9 @@
 <?php
 if (isset($_GET["request"])) {
     $request = $_GET["request"];
-} else {
+    $reqText=$request['request'];
+    $reqData=$request['data'];
+} else 
     header('Location: ../drawing.html');
     exit;
 }
@@ -13,7 +15,7 @@ $partnerID = $_SESSION["partnerID"];
 $partnerName = $_SESSION["partnerName"];
 $QNum = $_SESSION["QNum"];
 
-if ($request === "iniSet") {
+if ($reqText === "iniSet") {
     /*[
        'mode' => $mode, 
        'id' => $id, 
@@ -21,21 +23,21 @@ if ($request === "iniSet") {
        'partnerID' => $partnerID, 
        'partnerName' => $partnerName
     ];*/
-} else if ($request === "iniSetFigures") {
+} else if ($reqText === "iniSetFigures") {
     /*[
         'drawLines'=>$drawLines,
         'drawCircles=>$drawCircles
     ];*/
-} else if ($request === "changeTurn") {
+} else if ($reqText === "changeTurn") {
     /*
     void 
     */
-} else if ($request === "judge") {
+} else if ($reqText === "judge") {
     /*[
         'AnsLines'=>$AnsLines,
         'AnsCircles'=>$AnsCircles,
     ];*/
-} else if ($request === "nextQuestion") {
+} else if ($reqText === "nextQuestion") {
     /*[
         'nextURL=>$URL
     ]*/
