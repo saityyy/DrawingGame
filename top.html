@@ -31,7 +31,7 @@
             var xhr = new XMLHttpRequest();
             xhr.open('GET', 'backend/top.php', true);
             xhr.responseType = 'json';
-            xhr.send(null);
+            xhr.send();
             xhr.onreadystatechange = function () {
                 if (xhr.status == 200 && xhr.readyState == 4) {
                     var res = xhr.response;

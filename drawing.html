@@ -17,6 +17,7 @@
         <input type="button" value="ターン交代" onclick="c()">
         <script src="https://cdn.anychart.com/js/latest/graphics.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="drawing.js"></script>
         <script>
             var mode;
             var id;
@@ -28,6 +29,22 @@
             var drawLines = [];
             var drawCircles = [];
             var stage = acgraph.create('stage');
+            var Draw = new drawing(stage);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'draw.php', true);
+            xhr.responseType = 'json';
+            xhr.setRequestHeader('content-type',
+                'application/x-www-form-urlencoded;charset=UTF-8');
+            var json = JSON.stringify({ 'reqText': "iniset", 'data': "" });
+            console.log(json);
+            xhr.send("json=" + encodeURIComponent(json));
+            xhr.onreadystatechange = function () {
+                if (xhr.status == 200 && xhr.readyState == 4) {
+                    console.log(xhr.response);
+                    Draw.setData(xhr.response);
+                    Draw.draw();
+                }
+            };
             var conn = new WebSocket('ws://localhost:80');
             var ws_flag = false;
             conn.onopen = function (e) {
@@ -61,14 +78,6 @@
                 linePath.close();
             }
 
-            function draw(lines, circles) {
-                lines.forEach(function (xy) {
-                    Line(xy[0], xy[1], xy[2], xy[3]);
-                });
-                circles.forEach(function (xy) {
-                    stage.circle(xy[0], xy[1], xy[2]);
-                });
-            }
 
             function r() {
                 var s = draw_stack.pop();
@@ -139,7 +148,6 @@
                 if (correct) $('#result').text("正解です");
                 else $('#result').text("不正解です");
             };
-            draw(drawLines, drawCircles);
             $('#stage').on('mousemove', function (e) {
                 stage.rect(0, 0, 900, 600).fill('white');
                 if (clickX != -1 && clickY != -1) {
@@ -151,7 +159,6 @@
                         stage.circle(clickX, clickY, dist(clickX - e.offsetX, clickY - e.offsetY));
                     }
                 }
-                draw(drawLines, drawCircles);
             });
             $('#stage').on('click', function (e) {
                 if (clickX == -1 && clickY == -1) {
