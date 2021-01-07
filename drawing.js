@@ -6,11 +6,15 @@ class drawing {
         this.mode = iniData['mode'];
         this.id = iniData['id'];
         this.partnerID = iniData['partnerID'];
-        this.turn_flag = iniData['turn_flag'];
+        this.turnFlag = iniData['turnFlag'];
         this.drawLines = iniData['drawLines'];
         this.drawCircles = iniData['drawCircles'];
+        this.addLines = iniData['addLines'];
+        this.addCircles = iniData['addCircles'];
+        this.addFigureStack = iniData['addFigureStack'];
         this.clickX = -1;
         this.clickY = -1;
+
     }
     Line(xy, col = "#000", weight = 5) {
         var linePath = acgraph.path();
@@ -21,26 +25,28 @@ class drawing {
         linePath.close();
     }
     Circle(xy, col = "#000", weight = 5) { this.stage.circle(xy[0], xy[1], xy[2]).stroke(col, weight) }
-    mouseMove(clickX, clickY, cx2, cy2) {
-        if (clickX != -1 && clickY != -1) {
-            if (mode) {
-                Circle(clickX, clickY, 5);
-                Line(clickX, clickY, cx2, cy2);
+    dist(dx, dy) { return parseInt(Math.sqrt(dx * dx + dy * dy)); }
+    mouseMove(cx2, cy2) {
+        if (this.clickX != -1 && this.clickY != -1) {
+            if (this.mode) {
+                this.Circle([this.clickX, this.clickY, 5]);
+                this.Line([this.clickX, this.clickY, cx2, cy2]);
             } else {
-                Circle(clickX, clickY, 5);
-                Circle(clickX, clickY, dist(clickX - cx2, clickY - cy2));
+                this.Circle([this.clickX, this.clickY, 5]);
+                this.Circle([this.clickX, this.clickY, this.dist(this.clickX - cx2, this.clickY - cy2)]);
             }
         }
     }
     mouseClick(cx2, cy2) {
-        if (clickX == -1 && clickY == -1) {
-            clickX = cx2;
-            clickY = cy2;
+        if (this.clickX == -1 && this.clickY == -1) {
+            this.clickX = cx2;
+            this.clickY = cy2;
         } else {
-            if (mode) this.drawLines.push([clickX, clickY, cx2, cy2]);
-            else this.drawCircles.push([clickX, clickY, dist(clickX - cx2, clickY - cy2)]);
-            clickX = -1;
-            clickY = -1;
+            if (this.mode) this.addLines.push([this.clickX, this.clickY, cx2, cy2]);
+            else this.addCircles.push([this.clickX, this.clickY, this.dist(this.clickX - cx2, this.clickY - cy2)]);
+            this.addFigureStack.push(this.mode);
+            this.clickX = -1;
+            this.clickY = -1;
         }
     }
 

@@ -10,17 +10,44 @@
         <h2>二等分線を引け</h2>
         <div id="stage" style="width:900px;height:600px;border:solid 1px #000"></div>
         <div id=correctJudge>
-            <input type="button" value="正誤判定" onclick="judge()">
+            <input type="button" value="正誤判定" onclick="judge_request()">
             <p id=result></p>
         </div>
-        <input type="button" value="一つ前に戻る" onclick="r()">
-        <input type="button" value="ターン交代" onclick="c()">
+        <input type="button" value="一つ前に戻る" onclick="undoDraw()">
+        <input type="button" value="ターン交代" onclick="changeTurn()">
+        <input type="button" value="モード変更" onclick="changemode()">
         <script src="https://cdn.anychart.com/js/latest/graphics.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="drawing.js"></script>
         <script>
+            var turnFlag = true;
+            var iniSetFlag = false;
+            var wsFlag = false;
+            var stage = acgraph.create('stage');
+            var Draw = new drawing(stage);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'draw.php', true);
+            xhr.responseType = 'json';
+            xhr.setRequestHeader('content-type',
+                'application/x-www-form-urlencoded;charset=UTF-8');
+            var json = JSON.stringify({ "reqText": "iniset" });
+            console.log(json);
+            xhr.send("request=" + encodeURIComponent(json));
+
+            function changemode() {
+                if (Draw.mode) Draw.mode = 0;
+                else { Draw.mode = 1; }
+            }
+
+            function judge_request() {
+                var json = JSON.stringify({ "reqText": "judge" });
+                console.log(json);
+                xhr.send("request=" + encodeURIComponent(json));
+            }
             function judge(linesAns, circlesAns) {
                 var correct;
+                var drawLines = Draw.drawLines.concat(Draw.addLines);
+                var drawCircles = Draw.drawCircles.concat(Draw.addCircles);
                 console.log(drawLines);
                 console.log(drawCircles);
                 correct = linesAns.every(function lines_check(ans) {
@@ -56,70 +83,82 @@
                 Draw.drawCircles.forEach(function (xy) {
                     Draw.Circle(xy);
                 })
+                Draw.addLines.forEach(function (xy) {
+                    Draw.Line(xy);
+                });
+                Draw.addCircles.forEach(function (xy) {
+                    Draw.Circle(xy);
+                })
             }
-            var turn_flag = true;
-            var stage = acgraph.create('stage');
-            var Draw = new drawing(stage);
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'draw.php', true);
-            xhr.responseType = 'json';
-            xhr.setRequestHeader('content-type',
-                'application/x-www-form-urlencoded;charset=UTF-8');
-            var json = JSON.stringify({ "reqText": "iniset" });
-            console.log(json);
-            xhr.send("request=" + encodeURIComponent(json));
+            function undoDraw() {
+                var Stack = Draw.addFigureStack.pop();
+                console.log(Draw.addFigureStack);
+                if (Stack == 0) Draw.addCircles.pop();
+                else if (Stack == 1) Draw.addLines.pop();
+                stage.rect(0, 0, 900, 600).fill('white');
+                draw();
+            }
+            function changeTurn() {
+                if (iniSetFlag && wsFlag) {
+                    var json = JSON.stringify({
+                        "reqText": "changeTurn",
+                        "data": {
+                            'addLines': Draw.addLines,
+                            'addCircles': Draw.addCircles
+                        }
+                    });
+                    console.log(json);
+                    xhr.send("request=" + encodeURIComponent(json));
+                }
+            }
             xhr.onreadystatechange = function () {
                 if (xhr.status == 200 && xhr.readyState == 4) {
                     var res = xhr.response;
-                    console.log(res["resText"]);
+                    console.log(res);
                     if (res["resText"] == "iniset") {
                         Draw.setData(res);
-                        console.log(Draw.drawLines);
+                        console.log(res);
                         draw();
+                        iniSetFlag = true;
+                    }
+                    if (res["resText"] == "changeTurn") {
+                        conn.send(Draw.id);
+                        location.reload();
+                    }
+                    if (res["resText"] == "judge") {
+                        if (judge(res['linesAns'], res['circlesAns'])) {
+                            window.location.href = res['nextURL'];
+                        }
+                        else {//不正解のときの処理
+                        }
                     }
                 }
             };
             var conn = new WebSocket('ws://localhost:80');
-            var ws_flag = false;
             conn.onopen = function (e) {
                 console.log("connection for comment established!");
-                ws_flag = true;
+                wsFlag = true;
             };
             conn.onmessage = function (e) {
-                if (e.data == partnerID) {
+                if (e.data == Draw.partnerID) {
                     console.log(e.data);
-                    turn_flag = true;
+                    location.reload();
                 }
             };
-            //var conn = new WebSocket('ws://localhost:80');
-
-            function c() {
-                if (ws_flag) {
-                    turn_flag = false;
-                    conn.send(id);
-                }
-            }
-
-            function dist(dx, dy) {
-                return parseInt(Math.sqrt(dx * dx + dy * dy));
-            }
-
-            function r() {
-                var s = draw_stack.pop();
-                if (s == 1) drawLines.pop();
-                else if (s == 0) drawCircles.pop();
-                stage.rect(0, 0, 900, 600).fill('white');
-                draw(drawLines, drawCircles);
-            }
-
             $('#stage').on('mousemove', function (e) {
-                stage.rect(0, 0, 900, 600).fill('white');
-                Draw.mouseMove(clickX, clickY, e.offsetX, e.offsetY);
-                draw();
+                if (turnFlag) {
+                    stage.rect(0, 0, 900, 600).fill('white');
+                    console.log(Draw.mode);
+                    Draw.mouseMove(e.offsetX, e.offsetY);
+                    draw();
+                }
             });
             $('#stage').on('click', function (e) {
-                Draw.mouseClick(e.offsetX, e.offsetY);
-            });
+                if (turnFlag) {
+                    Draw.mouseClick(e.offsetX, e.offsetY);
+                    console.log(Draw.addLines);
+                }
+            }); 
         </script>
     </body>
 

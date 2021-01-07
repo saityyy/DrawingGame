@@ -8,7 +8,10 @@ $array = [
     'partnerID' => 3,
     'turn_flag' => 1,
     'drawLines' => [[100, 200, 300, 400]],
-    'drawCircles' => [[400, 300, 200]]
+    'drawCircles' => [[400, 300, 200]],
+    'addLines' => [],
+    'addCircles' => [],
+    'addFigureStack' => []
 ];
 $json = json_encode($array);
 echo $json;
