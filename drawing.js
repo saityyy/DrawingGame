@@ -9,53 +9,63 @@ class drawing {
         this.turn_flag = iniData['turn_flag'];
         this.drawLines = iniData['drawLines'];
         this.drawCircles = iniData['drawCircles'];
+        this.clickX = -1;
+        this.clickY = -1;
     }
-    draw() {
-        console.log(this.drawLines);
-        for (var i = 0; i < this.drawLines.length; i++) {
-            var xy = this.drawLines[i];
-            var linePath = acgraph.path();
-            linePath.parent(this.stage);
-            linePath.moveTo(xy[0], xy[1]);
-            linePath.lineTo(xy[2], xy[3]).fill("#000").strokeThickness(5);
-            linePath.close();
-        }
-        for (var i = 0; i < this.drawCircles.length; i++) {
-            var xy = this.drawCircles[i];
-            this.stage.circle(xy[0], xy[1], xy[2]);
-        };
-    }
-    Line(x1, y1, x2, y2) {
+    Line(xy, col = "#000", weight = 5) {
         var linePath = acgraph.path();
         linePath.parent(this.stage);
-        linePath.moveTo(x1, y1);
-        linePath.lineTo(x2, y2).fill("#000").strokeThickness(5);
+        linePath.moveTo(xy[0], xy[1]);
+        linePath.lineTo(xy[2], xy[3]);
+        linePath.stroke(col, weight);
         linePath.close();
     }
-    Circle(x1, y1, r) { this.stage.circle(x1, y2, r); }
-    mouseMove(clickX, clickY) {
-        this.stage.rect(0, 0, 900, 600).fill('white');
+    Circle(xy, col = "#000", weight = 5) { this.stage.circle(xy[0], xy[1], xy[2]).stroke(col, weight) }
+    mouseMove(clickX, clickY, cx2, cy2) {
         if (clickX != -1 && clickY != -1) {
             if (mode) {
-                Circle(clickX, clickY, 5).fill("black");
-                Line(clickX, clickY, e.offsetX, e.offsetY);
+                Circle(clickX, clickY, 5);
+                Line(clickX, clickY, cx2, cy2);
             } else {
-                Circle(clickX, clickY, 5).fill("black");
-                Circle(clickX, clickY, dist(clickX - e.offsetX, clickY - e.offsetY));
+                Circle(clickX, clickY, 5);
+                Circle(clickX, clickY, dist(clickX - cx2, clickY - cy2));
             }
         }
-        draw(drawLines, drawCircles);
     }
-    mouseClick(clickX, clickY) {
+    mouseClick(cx2, cy2) {
         if (clickX == -1 && clickY == -1) {
-            clickX = e.offsetX;
-            clickY = e.offsetY;
+            clickX = cx2;
+            clickY = cy2;
         } else {
-            if (mode) drawLines.push([clickX, clickY, e.offsetX, e.offsetY]);
-            else drawCircles.push([clickX, clickY, dist(clickX - e.offsetX, clickY - e.offsetY)]);
-            draw_stack.push(mode);
+            if (mode) this.drawLines.push([clickX, clickY, cx2, cy2]);
+            else this.drawCircles.push([clickX, clickY, dist(clickX - cx2, clickY - cy2)]);
             clickX = -1;
             clickY = -1;
         }
+    }
+
+    judgeLine(inp, ans) {
+        var flag = true;
+        //length_check
+        flag = flag && inp[3] > (ans[3] - 20);
+        console.log("length_check -> " + flag);
+        //angle_check
+        var ans_ang = Math.atan(ans[2]);
+        var inp_ang = Math.atan(inp[2]);
+        flag = flag && (ans_ang - 0.02 < inp_ang) && (inp_ang < ans_ang + 0.02);
+        console.log(ans_ang - 0.02 + " < " + inp_ang + " < " + ans_ang + 0.02);
+        console.log("angle_check -> " + flag);
+        //startPoint_check
+        flag = flag && (ans[0] - 10 < inp[0]) && (inp[0] < ans[0] + 10);
+        flag = flag && (ans[1] - 10 < inp[1]) && (inp[1] < ans[1] + 10);
+        console.log("startPoint_check -> " + flag);
+        return flag;
+    }
+    judgeCircle(inp, ans) {
+        var flag = true;
+        flag = flag && (ans[0] - 10 < inp[0]) && (inp[0] < ans[0] + 10);
+        flag = flag && (ans[1] - 10 < inp[1]) && (inp[1] < ans[1] + 10);
+        flag = flag && (ans[2] - 10 < inp[2]) && (inp[2] < ans[2] + 10);
+        return flag;
     }
 }

@@ -1,7 +1,8 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-$data = json_decode($_POST["reqText"]);
+$data = json_decode($_POST["request"], true);
 $array = [
+    'resText' => $data["reqText"],
     'mode' => 1,
     'id' => 2,
     'partnerID' => 3,

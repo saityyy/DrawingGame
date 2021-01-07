@@ -14,20 +14,21 @@
         var cnt = [1, 2, 3];
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'test2.php', true);
-        xhr.responseType = 'json';
+        //xhr.responseType = 'json';
         xhr.setRequestHeader('content-type',
             'application/x-www-form-urlencoded;charset=UTF-8');
         //xhr.setRequestHeader('content-type',
         //'application/json;charset=UTF-8');
-        var json = JSON.stringify({
-            a: [1, 2, 3, 4, 5],
-            b: 4
-        });
-        console.log(json);
+        var json = {
+            "a": [1, 2, 3, 4, 5],
+            "b": 4
+        };
+        json = JSON.stringify(json);
         xhr.send("json=" + encodeURIComponent(json));
         xhr.onreadystatechange = function() {
             if (xhr.status == 200 && xhr.readyState == 4) {
-                console.log(xhr.response);
+                var res = JSON.parse(xhr.response);
+                console.log(res);
             }
         };
         </script>
