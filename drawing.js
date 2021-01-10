@@ -6,15 +6,19 @@ class drawing {
         this.mode = iniData['mode'];
         this.id = iniData['id'];
         this.partnerID = iniData['partnerID'];
+        this.partnerName = iniData['partnerName'];
         this.turnFlag = iniData['turnFlag'];
         this.drawLines = iniData['drawLines'];
         this.drawCircles = iniData['drawCircles'];
-        this.addLines = iniData['addLines'];
-        this.addCircles = iniData['addCircles'];
-        this.addFigureStack = iniData['addFigureStack'];
+        this.ansLines = iniData['ansLines'];
+        this.ansCircles = iniData['ansCircles'];
+        this.nextURL = iniData['nextURL'];
+        this.addLines = [];
+        this.addCircles = [];
+        this.addFigureStack = [];
+        this.res = iniData;
         this.clickX = -1;
         this.clickY = -1;
-
     }
     Line(xy, col = "#000", weight = 5) {
         var linePath = acgraph.path();

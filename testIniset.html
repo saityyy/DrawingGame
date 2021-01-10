@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+    <head>
+        <meta charset="utf-8">
+        <title>test</title>
+    </head>
+
+    <body>
+        <script>
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'backend/iniSet.php', true);
+            xhr.responseType = 'json';
+            xhr.setRequestHeader('content-type',
+                'application/x-www-form-urlencoded;charset=UTF-8');
+            xhr.send(null);
+            xhr.onreadystatechange = function () {
+                if (xhr.status == 200 && xhr.readyState == 4) {
+                    console.log(xhr.response);
+                    /*
+                    mode
+                    id 
+                    partnerID
+                    partnerName
+                    turnFlag
+                    drawLines
+                    drawCircles
+                    ansLines
+                    ansCircles
+                    nextURL
+                    */
+                }
+            }
+        </script>
+    </body>
+
+</html>
