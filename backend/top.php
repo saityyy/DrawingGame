@@ -3,7 +3,7 @@ header('Content-Type: application/json; charset=utf-8');
 session_start();
 $pdo = new PDO("sqlite:data.sqlite");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$st = $pdo->query("select * from user");
+$st = $pdo->query("select * from users");
 $data = $st->fetchAll();
 $login_flag = 0;
 $registNum = 0;

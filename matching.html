@@ -13,7 +13,8 @@
         <p id="partner"></p>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script type="text/javascript">
-            function countDown(sec, Pname) {
+            function countDown(Pname, sec = 100) {
+                console.log(sec);
                 var i = sec;
                 setInterval(function () {
                     $("#result").html("<h1>マッチングに成功しました</h1>");
@@ -45,7 +46,7 @@
                             if (partnerID != -100) {
                                 conn.send([partnerID, id, name]);
                                 console.log("send_success");
-                                countDown(3, partnerName);
+                                countDown(partnerName);
                             } else {
                                 $("#result").html("<h2>パートナーが見つかりませんでした</h2>");
                                 $("#result").append("<a href=''>もう一度探す</a>");
@@ -65,7 +66,7 @@
                             xhr2.send(null);
                             xhr2.onreadystatechange = function () {
                                 if (xhr2.status == 200 && xhr2.readyState == 4) {
-                                    countDown(3, temp[2]);
+                                    countDown(temp[2]);
                                 }
                             }
                         }

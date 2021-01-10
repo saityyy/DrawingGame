@@ -6,7 +6,7 @@ if ($_GET["username"] && $_GET["password"]) {
 
     $pdo = new PDO("sqlite:data.sqlite");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $st = $pdo->prepare("select * from user where name==?;");
+    $st = $pdo->prepare("select * from users where name==?;");
     $st->execute(array($username));
     $data = $st->fetch();
 
