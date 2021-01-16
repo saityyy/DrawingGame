@@ -1,3 +1,7 @@
+<?php
+session_start();
+//$_SESSION['addFigureStack'] = [];
+?>
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -10,23 +14,21 @@
         <h2>二等分線を引け</h2>
         <div id="stage" style="width:900px;height:600px;border:solid 1px #000"></div>
         <div id=correctJudge>
-            <input type="button" value="正誤判定" onclick="judge_request()">
+            <input type="button" value="正誤判定" onclick="judge()">
             <p id=result></p>
         </div>
         <input type="button" value="一つ前に戻る" onclick="undoDraw()">
         <input type="button" value="ターン交代" onclick="changeTurn()">
-        <input type="button" value="モード変更" onclick="changemode()">
         <script src="https://cdn.anychart.com/js/latest/graphics.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="drawing.js"></script>
         <script>
-        var turnFlag = true;
         var iniSetFlag = false;
         var wsFlag = false;
         var stage = acgraph.create('stage');
         var Draw = new drawing(stage);
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'iniSet.php', true);
+        xhr.open('POST', 'backend/iniSet.php', true);
         xhr.responseType = 'json';
         xhr.setRequestHeader('content-type',
             'application/x-www-form-urlencoded;charset=UTF-8');
@@ -34,20 +36,23 @@
         xhr.onreadystatechange = function() {
             if (xhr.status == 200 && xhr.readyState == 4) {
                 var res = xhr.response;
+                console.log(res);
                 Draw.setData(res);
-                console.log(Draw.addLines);
-                console.log("test : " + Draw.nextURL);
                 draw();
                 iniSetFlag = true;
+                if (Draw.turnFlag == 1) console.log("your turn");
+                else console.log("partner turn");
+                console.log("addFigureStack => " + Draw.addFigureStack);
             }
         };
+
 
         function draw() {
             Draw.drawLines.forEach(function(xy) {
                 Draw.Line(xy);
             });
             Draw.drawCircles.forEach(function(xy) {
-                Draw.Circle(xy);
+                Draw.Circle(xy, undefined, 5);
             })
             Draw.addLines.forEach(function(xy) {
                 Draw.Line(xy);
@@ -57,25 +62,46 @@
             })
         }
 
-        function changemode() {
-            if (Draw.mode) Draw.mode = 0;
-            else {
-                Draw.mode = 1;
-            }
-        }
-
         function changeTurn() {
-            if (iniSetFlag && wsFlag) {
+            if (iniSetFlag && wsFlag && Draw.turnFlag == 1) {
+                var xhr2 = new XMLHttpRequest();
+                xhr2.open('POST', 'backend/changeTurn.php', true);
+                xhr2.setRequestHeader('content-type',
+                    'application/x-www-form-urlencoded;charset=UTF-8');
                 var array = {
                     'id': Draw.id,
                     'addLines': Draw.addLines,
                     'addCircles': Draw.addCircles,
                     'addFigureStack': Draw.addFigureStack
                 }
-                conn.send(array);
-                location.reload();
+                console.log(array);
+                var json = JSON.stringify(array);
+                xhr2.send("json=" + encodeURIComponent(json));
+                conn.send(json);
+                window.location.href = "drawing.php";
             }
         }
+        var conn = new WebSocket('ws://localhost:80');
+        conn.onopen = function(e) {
+            console.log("connection for comment established!");
+            wsFlag = true;
+        };
+        conn.onmessage = function(e) {
+            data = JSON.parse(e.data);
+            if (data['id'] == Draw.partnerID) {
+                var xhr2 = new XMLHttpRequest();
+                xhr2.open('POST', 'backend/changeTurn.php', true);
+                xhr2.setRequestHeader('content-type',
+                    'application/x-www-form-urlencoded;charset=UTF-8');
+                xhr2.send("afs=" + encodeURIComponent(e.data));
+                xhr2.onreadystatechange = function() {
+                    if (xhr2.status == 200 && xhr2.readyState == 4) {
+                        console.log(xhr2.response);
+                        //window.location.href = "drawing.php";
+                    }
+                }
+            }
+        };
 
         function judge(linesAns, circlesAns) {
             var correct;
@@ -119,48 +145,17 @@
             stage.rect(0, 0, 900, 600).fill('white');
             draw();
         }
-        var conn = new WebSocket('ws://localhost:80');
-        conn.onopen = function(e) {
-            console.log("connection for comment established!");
-            wsFlag = true;
-            conn.send("addFigureDataRequest");
-        };
-        conn.onmessage = function(e) {
-            if (e.data == "addFigureDataRequest") {
-                var array = {
-                    'id': Draw.id,
-                    'addLines': Draw.addLines,
-                    'addCircles': Draw.addCircles,
-                    'addFigureStack': Draw.addFigureStack
-                }
-                conn.send(array);
-            } else if (e.data['id'] == Draw.partnerID) {
-                console.log(e.data);
-                Draw.addLines = e.data['addLines'];
-                Draw.addCircles = e.data['addCircles'];
-                Draw.addFigureStack = e.data['addFigureStack'];
-                console.log(Draw.addLines);
-                draw();
-            }
-        };
         $('#stage').on('mousemove', function(e) {
-            if (turnFlag) {
+            if (Draw.turnFlag == 1) {
                 stage.rect(0, 0, 900, 600).fill('white');
                 Draw.mouseMove(e.offsetX, e.offsetY);
                 draw();
             }
         });
         $('#stage').on('click', function(e) {
-            if (turnFlag) {
+            if (Draw.turnFlag == 1) {
                 Draw.mouseClick(e.offsetX, e.offsetY);
-                console.log(Draw.addLines);
-                var array = {
-                    'id': Draw.id,
-                    'addLines': Draw.addLines,
-                    'addCircles': Draw.addCircles,
-                    'addFigureStack': Draw.addFigureStack
-                }
-                conn.send(array);
+                console.log(Draw.addFigureStack);
             }
         });
         </script>

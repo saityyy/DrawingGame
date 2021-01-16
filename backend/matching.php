@@ -2,7 +2,7 @@
 session_start();
 if (isset($_GET["mode"])) {
     $_SESSION["mode"] = $_GET["mode"];
-    header('Location: ../matching.html');
+    header('Location: ../matching.php');
     exit;
 }
 if (isset($_GET["partnerID"]) && isset($_GET["partnerName"])) {
@@ -14,6 +14,7 @@ header('Content-Type: application/json; charset=utf-8');
 $mode = $_SESSION["mode"];
 $name = $_SESSION["username"];
 $id = $_SESSION["id"];
+$_SESSION['turnFlag'] = $mode;
 $pdo = new PDO("sqlite:data.sqlite");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $st = $pdo->query("update users set mode=" . $mode . " where id=" . $id . ";");

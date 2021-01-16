@@ -13,10 +13,9 @@ class drawing {
         this.ansLines = iniData['ansLines'];
         this.ansCircles = iniData['ansCircles'];
         this.nextURL = iniData['nextURL'];
-        this.addLines = [];
-        this.addCircles = [];
-        this.addFigureStack = [];
-        this.res = iniData;
+        this.addLines = iniData['addLines'];
+        this.addCircles = iniData['addCircles'];
+        this.addFigureStack=iniData['addFigureStack'];
         this.clickX = -1;
         this.clickY = -1;
     }
@@ -28,11 +27,13 @@ class drawing {
         linePath.stroke(col, weight);
         linePath.close();
     }
-    Circle(xy, col = "#000", weight = 5) { this.stage.circle(xy[0], xy[1], xy[2]).stroke(col, weight) }
+    Circle(xy, col = "#000", weight = 5) { 
+        this.stage.circle(xy[0], xy[1], xy[2]).stroke(col, weight) 
+    }
     dist(dx, dy) { return parseInt(Math.sqrt(dx * dx + dy * dy)); }
     mouseMove(cx2, cy2) {
         if (this.clickX != -1 && this.clickY != -1) {
-            if (this.mode) {
+            if (this.mode==1) {
                 this.Circle([this.clickX, this.clickY, 5]);
                 this.Line([this.clickX, this.clickY, cx2, cy2]);
             } else {
@@ -46,7 +47,7 @@ class drawing {
             this.clickX = cx2;
             this.clickY = cy2;
         } else {
-            if (this.mode) this.addLines.push([this.clickX, this.clickY, cx2, cy2]);
+            if (this.mode==1) this.addLines.push([this.clickX, this.clickY, cx2, cy2]);
             else this.addCircles.push([this.clickX, this.clickY, this.dist(this.clickX - cx2, this.clickY - cy2)]);
             this.addFigureStack.push(this.mode);
             this.clickX = -1;
