@@ -1,15 +1,19 @@
 <?php
 session_start();
+$maxQNum = 3; //問題数
 $_SESSION['QStack'] = [];
 if (isset($_GET["mode"])) {
     $_SESSION["mode"] = $_GET["mode"];
-    header('Location: ../matching.php');
+    header('Location: ../matching.html');
     exit;
 }
-if (isset($_GET["partnerID"]) && isset($_GET["partnerName"])) {
-    $_SESSION["partnerID"] =  $_GET["partnerID"];
-    $_SESSION["partnerName"] = $_GET["partnerName"];
-    exit;
+if (isset($_POST['json'])) {
+    $data = json_decode($_POST['json'], true);
+    $_SESSION["partnerID"] = $data['id'];
+    $_SESSION["partnerName"] = $data['name'];
+    $_SESSION['QStack'] = $data['QStack'];
+    echo $data;
+    exit();
 }
 header('Content-Type: application/json; charset=utf-8');
 $mode = $_SESSION["mode"];
@@ -25,6 +29,11 @@ $st = $pdo->query("update users set partnerID=0 where id=" . $id . ";");
 $partnerID = -100;
 $partnerName = -100;
 if ($mode == 0) {
+    if ($_SESSION["QStack"] == []) {
+        $array_problem = [1, 2, 3];
+        shuffle($array_problem);
+        $_SESSION["QStack"] = array_slice($array_problem, 0, $maxQNum);
+    }
     $st = $pdo->query("select * from users where mode=1 and partnerID=0;");
     $data = $st->fetchAll();
     if (count($data) > 0) {
@@ -41,6 +50,14 @@ if ($mode == 0) {
         $_SESSION["partnerName"] = $partnerName;
     }
 }
-$array = ['mode' => $mode, 'id' => $id, 'name' => $name, 'partnerID' => $partnerID, 'partnerName' => $partnerName, 'turnFlag' => $mode];
+$array = [
+    'mode' => $mode,
+    'id' => $id,
+    'name' => $name,
+    'partnerID' => $partnerID,
+    'partnerName' => $partnerName,
+    'turnFlag' => $mode,
+    'QStack' => $_SESSION['QStack']
+];
 $json = json_encode($array);
 echo $json;

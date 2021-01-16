@@ -9,7 +9,8 @@ session_destroy();
 
     <head>
         <meta charset="utf-8">
-        <title>Logout</title>
+        <title>ログアウト</title>
+        <link rel="stylesheet" href="../style.css" />
     </head>
 
     <body>

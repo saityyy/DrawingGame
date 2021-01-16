@@ -1,96 +1,54 @@
-/*top.htmlのcss*/
-    body {background-color:rgb(1,255,98);}
-    h1 {margin: auto; background-color:rgb(0, 174, 255); width: 50%;}
-    .center{text-align: center; margin: 5px 0px 0px 0px}
-    .mode0{position:absolute; left:calc(50% - 180px);}
-    .mode1{position:absolute; right:calc(50% - 150px);}
-    /*配置*/
-    <body>
-        <div class="center">/**/
-            <img src="DrawingGameLogo.png">
-        <div class="login">
-        </div>
-        <div class="newac">
-        </div>
-        <div class="RealTimeNum">
-        </div>
-        <h1>選択</h1>
-        <br>
-            <img src="compass2.png">/**/
-            　　
-            <img src="ruler2.png">/*これの前に全角の空白２マス*/
-        </div>
-        <form action="backend/matching.php" method="GET">
-            <div class="mode0">/**/
-            <input type="radio" name="mode" value="0">
-            <label for="0">コンパス</label>
-            </div>
-            <div class="mode1">/**/
-            <input type="radio" name="mode" value="1" checked>
-            <label for="1">定規</label>
-            </div>
-            <br>
-            <div class="center">/**/
-            <input type="submit" value="マッチング開始">
-            </div>
-        </form>
-
-
-        waitMatchingNum = res["waitMatchingNum"];
-                    if (name == 0) $(".login").html('<a href="login_form.html">ログイン</a>');
-                    else $(".login").append('<p>ようこそ' + name + 'さん</p>');
-                    if (name != 0)
-                    $(".login").append('<p><a href="backend/logout.php">ログアウト</a></p>');
-                    if(name == 0)
-                    $(".newac").append('<p><a href="newac_form.html">新規アカウント</a></p>');
-                }
-            };
-        </script>
-
-/*matching.htmlのcss*/
-    <style>
-    body{background-color: rgb(1,255,98); text-align: center;}
-    </style>
-
-    <body>の一番最初に <br>×4 を配置する
-
-/*login_form.htmlのcss*/
-
-<style>
-    body{background-color: rgb(1,255,98);text-align: center;}
-</style>
-
-<iframe>に style="background-color: rgb(121, 228, 255);" を追加
-
-/*newac_form.htmlのcss*/
-
-<style>
-    body{background-color: rgb(1,255,98);text-align: center;}
-</style>
-
-<iframe>に style="background-color: rgb(121, 228, 255);" を追加
-
-/*logout.phpのcss*/
-
-<style>
-    body{background-color: rgb(1,255,98);text-align: center;}
-</style>
-
-<body>の一番最初に <br>×4 を配置する
-
-/*drawing.htmlのcss*/
-
-<style>
-    body{background-color: rgb(1,255,98);text-align: center;}
-</style>
-
-/*配置*/
-<body>
-    <h2>二等分線を引け</h2>
-    <div id="stage" style="width:900px;height:600px;border:solid 1px #000;position:absolute; left: calc(50% - 450px);"></div>/**/
-    <div id=correctJudge>
-        <input type="button" value="正誤判定" onclick="judge()" style="position:absolute; left: 46%;top: 75%">/**/
-        <p id=result></p>
-    </div>
-    <input type="button" value="一つ前に戻る" onclick="r()" style="position:absolute; left: calc(46% - 85px);top: 80%">/**/
-    <input type="button" value="ターン交代" onclick="c()" style="position:absolute; left: calc(46% + 60px);top: 80%">/**/
+* {
+  margin: 0px;
+}
+body {
+  background-color: rgb(1, 255, 98);
+  padding: 20px;
+}
+.center h1 {
+  margin: auto;
+  background-color: rgb(0, 174, 255);
+  width: 50%;
+}
+.center .account {
+  margin-bottom: 40px;
+}
+.center .logo {
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+.center {
+  text-align: center;
+  margin: 5px 0px 0px 0px;
+}
+.mode0 {
+  position: absolute;
+  left: calc(50% - 180px);
+}
+.mode1 {
+  position: absolute;
+  right: calc(50% - 150px);
+}
+#judge_result {
+  font-size: 50px;
+}
+.button {
+  margin: 20px;
+  display: inline-block;
+  border-radius: 4%; /* 角丸       */
+  font-size: 18pt; /* 文字サイズ */
+  text-align: center; /* 文字位置   */
+  cursor: pointer; /* カーソル   */
+  padding: 28px 89px; /* 余白       */
+  background: #000000; /* 背景色     */
+  color: #ffffff; /* 文字色     */
+  line-height: 1em; /* 1行の高さ  */
+  transition: 0.3s; /* なめらか変化 */
+  box-shadow: 6px 6px 9px #666666; /* 影の設定 */
+  border: 2px solid #000000; /* 枠の指定 */
+}
+.button:hover {
+  box-shadow: none; /* カーソル時の影消去 */
+  color: #000000; /* 背景色     */
+  background: #ffffff; /* 文字色     */
+}

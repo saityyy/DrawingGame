@@ -10,17 +10,23 @@ if ($_GET['currentQNum']) {
     <head>
         <meta charset="utf-8">
         <title>drawing</title>
+        <link rel="stylesheet" href="style.css" />
     </head>
 
     <body>
-        <h2>二等分線を引け</h2>
-        <div id="stage" style="width:900px;height:600px;border:solid 1px #000"></div>
-        <div id=correctJudge>
-            <input type="button" value="正誤判定" onclick="judgeRequest()">
-            <p id=result></p>
+        <h1 id="turn"></h1>
+        <div id="Qinfo">
+            <h1 id="QNum"></h1>
+            <h2 id="Qtext"></h2>
         </div>
-        <input type="button" value="一つ前に戻る" onclick="undoDraw()">
-        <input type="button" value="ターン交代" onclick="changeTurn()">
+        <p id=judge_result></p>
+        <div id="stage" style="width:1200px;height:700px;border:solid 3px #000">
+        </div>
+        <div id=options>
+            <input type="button" value="正誤判定" onclick="judgeRequest()" class="button">
+            <input type="button" value="一つ前に戻る" onclick="undoDraw()" class="button">
+            <input type="button" value="ターン交代" onclick="changeTurn()" class="button">
+        </div>
         <script src="https://cdn.anychart.com/js/latest/graphics.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="drawing.js"></script>
@@ -42,12 +48,19 @@ if ($_GET['currentQNum']) {
                 Draw.setData(res);
                 draw();
                 iniSetFlag = true;
-                if (Draw.turnFlag == 1) console.log("your turn");
-                else console.log("partner turn");
-                console.log("addFigureStack => " + Draw.addFigureStack);
+                if (Draw.turnFlag == 1) {
+                    $('#turn').text("あなたのターンです");
+                    $('#stage').css("opacity", 1.0);
+                } else {
+                    $('#turn').text("相手のターンです。");
+                    $('#stage').css("opacity", 0.5);
+                }
+                console.log("addFigureStack = > " + Draw.addFigureStack);
+                $('#QNum').text("第" + Draw.currentQNum + "問目");
+                $('#Qtext').text(Draw.Qtext);
+
             }
         };
-
 
         function draw() {
             Draw.drawLines.forEach(function(xy) {
@@ -83,6 +96,15 @@ if ($_GET['currentQNum']) {
                 window.location.href = "drawing.php";
             }
         }
+
+        function countDown(sec = 5) {
+            if (Draw.nextURL == "result.html") sec = 0;
+            $("#judge_result").text("正解です。次の問題へ進みます。");
+            $("#judge_result").css("color", "blue");
+            setTimeout(function() {
+                window.location.href = Draw.nextURL;
+            }, sec * 1000);
+        }
         var conn = new WebSocket('ws://localhost:80');
         conn.onopen = function(e) {
             console.log("connection for comment established!");
@@ -92,10 +114,7 @@ if ($_GET['currentQNum']) {
             data = JSON.parse(e.data);
             if (data['id'] == Draw.partnerID) {
                 if (data['nextURL']) {
-                    console.log("正解です。次の問題に進みます");
-                    setTimeout(function() {
-                        window.location.href = Draw.nextURL;
-                    }, 5000);
+                    countDown();
                 } else {
                     var xhr2 = new XMLHttpRequest();
                     xhr2.open('POST', 'backend/changeTurn.php', true);
@@ -119,26 +138,20 @@ if ($_GET['currentQNum']) {
                 var drawCircles = Draw.addCircles;
                 var linesAns = Draw.ansLines;
                 var circlesAns = Draw.ansCircles;
-                console.log(drawLines);
-                console.log(drawCircles);
-                console.log(linesAns);
-                console.log(circlesAns);
+                //console.log(drawLines);
+                //console.log(drawCircles);
+                //console.log(linesAns);
+                //console.log(circlesAns);
                 correct = linesAns.every(function lines_check(ans) {
                     //(startX,startY,grad,length)
                     var flag2 = drawLines.some(function line_check(inp) {
-                        grad = (inp[3] - inp[1]) / (inp[2] - inp[0]);
+                        grad = -(inp[3] - inp[1]) / (inp[2] - inp[0]);
                         leng = Draw.dist(inp[0] - inp[2], inp[1] - inp[3]);
                         console.log(grad + " , " + leng);
                         var fA = Draw.judgeLine([inp[0], inp[1], grad, leng], ans);
                         var fB = Draw.judgeLine([inp[2], inp[3], grad, leng], ans);
                         return fA || fB;
                     });
-                    console.log(ans);
-                    if (flag2) {
-                        console.log("right");
-                    } else {
-                        console.log("false");
-                    }
                     return flag2;
                 });
                 correct = correct && circlesAns.every(function circles_check(ans) {
@@ -147,12 +160,6 @@ if ($_GET['currentQNum']) {
                         console.log("inp :" + inp);
                         return Draw.judgeCircle(inp, ans);
                     });
-                    console.log(ans);
-                    if (flag2) {
-                        console.log("right");
-                    } else {
-                        console.log("false");
-                    }
                     return flag2;
                 })
                 return correct;
@@ -166,11 +173,10 @@ if ($_GET['currentQNum']) {
                     'nextURL': Draw.nextURL
                 });
                 conn.send(json);
-                console.log("正解です。次の問題に進みます");
-                setTimeout(function() {
-                    window.location.href = Draw.nextURL;
-                }, 5000);
-
+                countDown();
+            } else {
+                $("#judge_result").text("不正解です。もう一度頑張りましょう");
+                $("#judge_result").css("color", "red");
             }
         }
 
@@ -179,14 +185,14 @@ if ($_GET['currentQNum']) {
             console.log(Draw.addFigureStack);
             if (Stack == 0) Draw.addCircles.pop();
             else if (Stack == 1) Draw.addLines.pop();
-            stage.rect(0, 0, 900, 600).fill('white');
+            stage.rect(0, 0, 1200, 700).fill("#01ff62");
             draw();
         }
         $('#stage').on('mousemove', function(e) {
             if (Draw.turnFlag == 1) {
-                stage.rect(0, 0, 900, 600).fill('white');
-                Draw.mouseMove(e.offsetX, e.offsetY);
+                stage.rect(0, 0, 1200, 700).fill("#01ff62");
                 draw();
+                Draw.mouseMove(e.offsetX, e.offsetY);
             }
         });
         $('#stage').on('click', function(e) {

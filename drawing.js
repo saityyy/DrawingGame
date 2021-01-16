@@ -8,6 +8,8 @@ class drawing {
         this.partnerID = iniData['partnerID'];
         this.partnerName = iniData['partnerName'];
         this.turnFlag = iniData['turnFlag'];
+        this.Qtext=iniData['Qtext'];
+        this.Qdiff=iniData['Qdiff'];
         this.drawLines = iniData['drawLines'];
         this.drawCircles = iniData['drawCircles'];
         this.ansLines = iniData['ansLines'];
@@ -40,6 +42,15 @@ class drawing {
             } else {
                 this.Circle([this.clickX, this.clickY, 5]);
                 this.Circle([this.clickX, this.clickY, this.dist(this.clickX - cx2, this.clickY - cy2)]);
+                var R=this.dist(this.clickX-cx2,this.clickY-cy2);
+                for(var i=0;i<this.addCircles.length;i++){
+                    var xy=this.addCircles[i];
+                    if(parseInt(xy[2])+5>R && xy[2]-5<R){
+                        console.log(xy);
+                        this.Circle(xy,"#f00",8);
+                        this.Circle([this.clickX, this.clickY, R],"f00",8);
+                    }
+                }
             }
         }
     }
@@ -59,25 +70,46 @@ class drawing {
     judgeLine(inp, ans) {
         var flag = true;
         //length_check
-        flag = flag && inp[3] > (ans[3] - 20);
-        console.log("length_check -> " + flag);
+        var ansX=parseInt(ans[0]);
+        var ansY=parseInt(ans[1]);
+        var ansG=parseInt(ans[2]);
+        var ansL=parseInt(ans[3]);
+        var inpX=parseInt(inp[0]);
+        var inpY=parseInt(inp[1]);
+        var inpG=parseInt(inp[2]);
+        var inpL=parseInt(inp[3]);
+        flag = flag && inpL > (ansL - 20);
+        //console.log("length_check -> " + flag);
         //angle_check
-        var ans_ang = Math.atan(ans[2]);
-        var inp_ang = Math.atan(inp[2]);
-        flag = flag && (ans_ang - 0.1 < inp_ang) && (inp_ang < ans_ang + 0.1);
+        var ans_ang = Math.atan(ansG);
+        var inp_ang = Math.atan(inpG);
+        flag=flag && (ans_ang - 0.1 < inp_ang);
+        flag=flag && (inp_ang < ans_ang + 0.1);
+        //console.log("ans_ang => "+ans_ang+"  ,  inp_ang => "+inp_ang);
         //console.log(ans_ang - 0.02 + " < " + inp_ang + " < " + ans_ang + 0.02);
         console.log("angle_check -> " + flag);
         //startPoint_check
-        flag = flag && (ans[0] - 20 < inp[0]) && (inp[0] < ans[0] + 20);
-        flag = flag && (ans[1] - 20 < inp[1]) && (inp[1] < ans[1] + 20);
-        console.log("startPoint_check -> " + flag);
+        if(ansX!=-1&&ansY!=-1){
+            flag=flag && ((ansX- 20) < inpX);
+            flag=flag && (inpX < (ansX + 20));
+            flag=flag && ((ansY - 20 )< inpY);
+            flag=flag && (inpY < (ansY + 20));
+            console.log("ans => "+ans+"  ,  inp => "+inp);
+            console.log("startPoint_check -> " + flag);
+        }
         return flag;
     }
     judgeCircle(inp, ans) {
+        var ansX=parseInt(ans[0]);
+        var ansY=parseInt(ans[1]);
+        var ansR=parseInt(ans[2]);
+        var inpX=parseInt(inp[0]);
+        var inpY=parseInt(inp[1]);
+        var inpR=parseInt(inp[2]);
         var flag = true;
-        flag = flag && (ans[0] - 10 < inp[0]) && (inp[0] < ans[0] + 10);
-        flag = flag && (ans[1] - 10 < inp[1]) && (inp[1] < ans[1] + 10);
-        flag = flag && (ans[2] - 10 < inp[2]) && (inp[2] < ans[2] + 10);
+        flag = flag && (ansX - 10 < inpX) && (inpX < ansX + 10);
+        flag = flag && (ansY - 10 < inpY) && (inpY < ansY + 10);
+        flag = flag && (ansR - 10 < inpR) && (inpR < ansR + 10);
         return flag;
     }
 }

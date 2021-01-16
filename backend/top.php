@@ -3,6 +3,9 @@ header('Content-Type: application/json; charset=utf-8');
 session_start();
 $pdo = new PDO("sqlite:data.sqlite");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+if (isset($_SESSION['id'])) {
+    $pdo->query("update users set partnerID=-1 where id=" . $_SESSION['id']);
+}
 $st = $pdo->query("select * from users");
 $data = $st->fetchAll();
 $login_flag = 0;

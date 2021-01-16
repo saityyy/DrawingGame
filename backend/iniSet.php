@@ -7,7 +7,7 @@ $name = $_SESSION["username"];
 $id = $_SESSION["id"];
 $partnerID = $_SESSION["partnerID"];
 $partnerName = $_SESSION["partnerName"];
-$maxQNum = 5; //問題数
+$maxQNum = 3; //問題数
 if ($mode == 0) {
     $lineID = $partnerID;
     $circleID = $id;
@@ -23,20 +23,15 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $fet = $db->query("select * from users where id=" . $id . ";");
 $fet = $fet->fetchAll();
 $turnFlag = $fet[0]['turnFlag'];
-if (!$_SESSION['addFigureStack']) {
+
+$QStack = $_SESSION['QStack'];
+if (count($_SESSION["QStack"]) - 1 == $maxQNum - $_SESSION['currentQNum']) {
+    $_SESSION['QNum'] = array_pop($_SESSION["QStack"]);  //該当の問題番号を設定
+    $db->query("delete from addLines;");
+    $db->query("delete from addCircles;");
     $_SESSION['addFigureStack'] = [];
 }
 $addFigureStack = $_SESSION['addFigureStack'];
-
-if ($_SESSION["QStack"] == []) {
-    $_SESSION["QStack"] = [0, 0, 0, 0, 0];
-    //$array_problem = range(0, 10);
-    //shuffle($array_problem);
-    //$_SESSION["QStack"] = array_slice($array_problem, 0, $maxQNum);
-}
-if (count($_SESSION["QStack"]) - 1 == $maxQNum - $_SESSION['currentQNum']) {
-    $_SESSION['QNum'] = array_pop($_SESSION["QStack"]);  //該当の問題番号を設定
-}
 $QNum = $_SESSION['QNum'];
 $drawLines = [];
 $drawCircles = [];
@@ -67,16 +62,20 @@ foreach ($fet as $a) {
 $fet = $db->query("select * from ansLines where QNumber=" . $QNum);
 $fet = $fet->fetchAll();
 foreach ($fet as $a) {
-    array_push($ansLines, [$a['startX'], $a['startY'], $a['angle'], $a['length']]);
+    array_push($ansLines, [$a['startX'], $a['startY'], $a['grad'], $a['length']]);
 }
 $fet = $db->query("select * from ansCircles where QNumber=" . $QNum);
 $fet = $fet->fetchAll();
 foreach ($fet as $a) {
     array_push($ansCircles, [$a['x1'], $a['y1'], $a['r']]);
 }
+$fet = $db->query("select * from questions where QNumber=" . $QNum);
+$fet = $fet->fetchAll();
+$Qtext = $fet[0]['text'];
+$Qdiff = $fet[0]['difficulty'];
 $nextURL = "drawing.php?currentQNum=" . ($_SESSION['currentQNum'] + 1);
 if (count($_SESSION["QStack"]) == 0) {
-    $nextURL = "result.php";
+    $nextURL = "result.html";
 }
 $array = [
     'mode' => $mode,
@@ -93,7 +92,9 @@ $array = [
     'ansLines' => $ansLines,
     'ansCircles' => $ansCircles,
     'nextURL' => $nextURL,
-    'currentQNum' => $_SESSION['currentQNum']
+    'currentQNum' => $_SESSION['currentQNum'],
+    'Qtext' => $Qtext,
+    'Qdiff' => $Qdiff
 ];
 
 $json = json_encode($array);
