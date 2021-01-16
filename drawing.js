@@ -16,6 +16,7 @@ class drawing {
         this.addLines = iniData['addLines'];
         this.addCircles = iniData['addCircles'];
         this.addFigureStack=iniData['addFigureStack'];
+        this.currentQNum=iniData['currentQNum'];
         this.clickX = -1;
         this.clickY = -1;
     }
@@ -63,12 +64,12 @@ class drawing {
         //angle_check
         var ans_ang = Math.atan(ans[2]);
         var inp_ang = Math.atan(inp[2]);
-        flag = flag && (ans_ang - 0.02 < inp_ang) && (inp_ang < ans_ang + 0.02);
-        console.log(ans_ang - 0.02 + " < " + inp_ang + " < " + ans_ang + 0.02);
+        flag = flag && (ans_ang - 0.1 < inp_ang) && (inp_ang < ans_ang + 0.1);
+        //console.log(ans_ang - 0.02 + " < " + inp_ang + " < " + ans_ang + 0.02);
         console.log("angle_check -> " + flag);
         //startPoint_check
-        flag = flag && (ans[0] - 10 < inp[0]) && (inp[0] < ans[0] + 10);
-        flag = flag && (ans[1] - 10 < inp[1]) && (inp[1] < ans[1] + 10);
+        flag = flag && (ans[0] - 20 < inp[0]) && (inp[0] < ans[0] + 20);
+        flag = flag && (ans[1] - 20 < inp[1]) && (inp[1] < ans[1] + 20);
         console.log("startPoint_check -> " + flag);
         return flag;
     }

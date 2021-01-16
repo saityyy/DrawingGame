@@ -30,53 +30,53 @@ $addFigureStack = $_SESSION['addFigureStack'];
 
 if ($_SESSION["QStack"] == []) {
     $_SESSION["QStack"] = [0, 0, 0, 0, 0];
-    $_SESSION['CurrentQNum'] = 1;
     //$array_problem = range(0, 10);
     //shuffle($array_problem);
     //$_SESSION["QStack"] = array_slice($array_problem, 0, $maxQNum);
 }
-if (count($_SESSION["QStack"]) > 0) {
-    $QNum = array_pop($_SESSION["QStack"]);  //該当の問題番号を設定
-    $drawLines = [];
-    $drawCircles = [];
-    $ansLines = [];
-    $ansCircles = [];
-    $addLines = [];
-    $addCircles = [];
-    $fet = $db->query("select * from drawLines where QNumber=" . $QNum);
-    $fet = $fet->fetchAll();
-    foreach ($fet as $a) {
-        array_push($drawLines, [$a['x1'], $a['y1'], $a['x2'], $a['y2']]);
-    }
-    $fet = $db->query("select * from drawCircles where QNumber=" . $QNum);
-    $fet = $fet->fetchAll();
-    foreach ($fet as $a) {
-        array_push($drawCircles, [$a['x1'], $a['y1'], $a['r']]);
-    }
-    $fet = $db->query("select * from addLines where drawerID=" . $lineID . ";");
-    $fet = $fet->fetchAll();
-    foreach ($fet as $a) {
-        array_push($addLines, [$a['x1'], $a['y1'], $a['x2'], $a['y2']]);
-    }
-    $fet = $db->query("select * from addCircles where drawerID=" . $circleID . ";");
-    $fet = $fet->fetchAll();
-    foreach ($fet as $a) {
-        array_push($addCircles, [$a['x1'], $a['y1'], $a['r']]);
-    }
-    $fet = $db->query("select * from ansLines where QNumber=" . $QNum);
-    $fet = $fet->fetchAll();
-    foreach ($fet as $a) {
-        array_push($ansLines, [$a['startX'], $a['startY'], $a['angle'], $a['length']]);
-    }
-    $fet = $db->query("select * from ansCircles where QNumber=" . $QNum);
-    $fet = $fet->fetchAll();
-    foreach ($fet as $a) {
-        array_push($ansCircles, [$a['x1'], $a['y1'], $a['r']]);
-    }
-    $nextURL = "drawing.php";
-    if (count($_SESSION["QStack"]) == 0) {
-        $nextURL = "result.html";
-    }
+if (count($_SESSION["QStack"]) - 1 == $maxQNum - $_SESSION['currentQNum']) {
+    $_SESSION['QNum'] = array_pop($_SESSION["QStack"]);  //該当の問題番号を設定
+}
+$QNum = $_SESSION['QNum'];
+$drawLines = [];
+$drawCircles = [];
+$ansLines = [];
+$ansCircles = [];
+$addLines = [];
+$addCircles = [];
+$fet = $db->query("select * from drawLines where QNumber=" . $QNum);
+$fet = $fet->fetchAll();
+foreach ($fet as $a) {
+    array_push($drawLines, [$a['x1'], $a['y1'], $a['x2'], $a['y2']]);
+}
+$fet = $db->query("select * from drawCircles where QNumber=" . $QNum);
+$fet = $fet->fetchAll();
+foreach ($fet as $a) {
+    array_push($drawCircles, [$a['x1'], $a['y1'], $a['r']]);
+}
+$fet = $db->query("select * from addLines where drawerID=" . $lineID . ";");
+$fet = $fet->fetchAll();
+foreach ($fet as $a) {
+    array_push($addLines, [$a['x1'], $a['y1'], $a['x2'], $a['y2']]);
+}
+$fet = $db->query("select * from addCircles where drawerID=" . $circleID . ";");
+$fet = $fet->fetchAll();
+foreach ($fet as $a) {
+    array_push($addCircles, [$a['x1'], $a['y1'], $a['r']]);
+}
+$fet = $db->query("select * from ansLines where QNumber=" . $QNum);
+$fet = $fet->fetchAll();
+foreach ($fet as $a) {
+    array_push($ansLines, [$a['startX'], $a['startY'], $a['angle'], $a['length']]);
+}
+$fet = $db->query("select * from ansCircles where QNumber=" . $QNum);
+$fet = $fet->fetchAll();
+foreach ($fet as $a) {
+    array_push($ansCircles, [$a['x1'], $a['y1'], $a['r']]);
+}
+$nextURL = "drawing.php?currentQNum=" . ($_SESSION['currentQNum'] + 1);
+if (count($_SESSION["QStack"]) == 0) {
+    $nextURL = "result.php";
 }
 $array = [
     'mode' => $mode,
@@ -92,7 +92,8 @@ $array = [
     'addFigureStack' => $addFigureStack,
     'ansLines' => $ansLines,
     'ansCircles' => $ansCircles,
-    'nextURL' => $nextURL
+    'nextURL' => $nextURL,
+    'currentQNum' => $_SESSION['currentQNum']
 ];
 
 $json = json_encode($array);

@@ -14,11 +14,6 @@
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script type="text/javascript">
         function countDown(Pname, sec = 3) {
-
-            var turnFlag = <?php
-                            session_start();
-                            echo $_SESSION['turnFlag']; ?>;
-            console.log(turnFlag);
             var i = sec;
             setInterval(function() {
                 $("#result").html("<h1>マッチングに成功しました</h1>");
@@ -27,7 +22,7 @@
                 i--;
             }, 1000)
             setTimeout(function() {
-                window.location.href = "drawing.php";
+                window.location.href = "drawing.php?currentQNum=1";
             }, (sec + 1) * 1000);
         }
         var xhr = new XMLHttpRequest();
@@ -38,10 +33,6 @@
             if (xhr.status == 200 && xhr.readyState == 4) {
                 var res = xhr.response;
                 console.log(res);
-                var turnFlag = <?php
-                                session_start();
-                                echo $_SESSION['turnFlag']; ?>;
-                console.log(turnFlag);
                 var mode = res["mode"];
                 var id = res["id"];
                 var name = res["name"];

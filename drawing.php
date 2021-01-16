@@ -1,6 +1,8 @@
 <?php
 session_start();
-//$_SESSION['addFigureStack'] = [];
+if ($_GET['currentQNum']) {
+    $_SESSION['currentQNum'] = $_GET['currentQNum'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -14,7 +16,7 @@ session_start();
         <h2>二等分線を引け</h2>
         <div id="stage" style="width:900px;height:600px;border:solid 1px #000"></div>
         <div id=correctJudge>
-            <input type="button" value="正誤判定" onclick="judge()">
+            <input type="button" value="正誤判定" onclick="judgeRequest()">
             <p id=result></p>
         </div>
         <input type="button" value="一つ前に戻る" onclick="undoDraw()">
@@ -89,52 +91,87 @@ session_start();
         conn.onmessage = function(e) {
             data = JSON.parse(e.data);
             if (data['id'] == Draw.partnerID) {
-                var xhr2 = new XMLHttpRequest();
-                xhr2.open('POST', 'backend/changeTurn.php', true);
-                xhr2.setRequestHeader('content-type',
-                    'application/x-www-form-urlencoded;charset=UTF-8');
-                xhr2.send("afs=" + encodeURIComponent(e.data));
-                xhr2.onreadystatechange = function() {
-                    if (xhr2.status == 200 && xhr2.readyState == 4) {
-                        console.log(xhr2.response);
-                        //window.location.href = "drawing.php";
+                if (data['nextURL']) {
+                    console.log("正解です。次の問題に進みます");
+                    setTimeout(function() {
+                        window.location.href = Draw.nextURL;
+                    }, 5000);
+                } else {
+                    var xhr2 = new XMLHttpRequest();
+                    xhr2.open('POST', 'backend/changeTurn.php', true);
+                    xhr2.setRequestHeader('content-type',
+                        'application/x-www-form-urlencoded;charset=UTF-8');
+                    xhr2.send("afs=" + encodeURIComponent(e.data));
+                    xhr2.onreadystatechange = function() {
+                        if (xhr2.status == 200 && xhr2.readyState == 4) {
+                            console.log(xhr2.response);
+                            window.location.href = "drawing.php";
+                        }
                     }
                 }
             }
         };
 
-        function judge(linesAns, circlesAns) {
-            var correct;
-            var drawLines = Draw.drawLines.concat(Draw.addLines);
-            var drawCircles = Draw.drawCircles.concat(Draw.addCircles);
-            console.log(drawLines);
-            console.log(drawCircles);
-            correct = linesAns.every(function lines_check(ans) {
-                //(startX,startY,grad,length)
-                ans = [
-                    ans[0],
-                    ans[1],
-                    (ans[3] - ans[1]) / (ans[2] - ans[0]),
-                    dist(ans[0] - ans[2], ans[1] - ans[3])
-                ];
-                var flag2 = this.drawLines.some(function line_check(inp) {
-                    inp = [
-                        inp[0],
-                        inp[1],
-                        (inp[3] - inp[1]) / (inp[2] - inp[0]),
-                        dist(inp[0] - inp[2], inp[1] - inp[3])
-                    ];
-                    Draw.judgeLine(inp, ans);
+        function judge() {
+            if (iniSetFlag && wsFlag && Draw.turnFlag == 1) {
+                var correct;
+                var drawLines = Draw.addLines;
+                var drawCircles = Draw.addCircles;
+                var linesAns = Draw.ansLines;
+                var circlesAns = Draw.ansCircles;
+                console.log(drawLines);
+                console.log(drawCircles);
+                console.log(linesAns);
+                console.log(circlesAns);
+                correct = linesAns.every(function lines_check(ans) {
+                    //(startX,startY,grad,length)
+                    var flag2 = drawLines.some(function line_check(inp) {
+                        grad = (inp[3] - inp[1]) / (inp[2] - inp[0]);
+                        leng = Draw.dist(inp[0] - inp[2], inp[1] - inp[3]);
+                        console.log(grad + " , " + leng);
+                        var fA = Draw.judgeLine([inp[0], inp[1], grad, leng], ans);
+                        var fB = Draw.judgeLine([inp[2], inp[3], grad, leng], ans);
+                        return fA || fB;
+                    });
+                    console.log(ans);
+                    if (flag2) {
+                        console.log("right");
+                    } else {
+                        console.log("false");
+                    }
+                    return flag2;
                 });
-                return flag2;
-            });
-            correct = correct && this.circlesAns.every(function circles_check(ans) {
-                var flag2 = drawCircles.some(function circle_check(inp) {
-                    return Draw.judgeCircle(inp, ans);
+                correct = correct && circlesAns.every(function circles_check(ans) {
+                    console.log(1);
+                    var flag2 = drawCircles.some(function circle_check(inp) {
+                        console.log("inp :" + inp);
+                        return Draw.judgeCircle(inp, ans);
+                    });
+                    console.log(ans);
+                    if (flag2) {
+                        console.log("right");
+                    } else {
+                        console.log("false");
+                    }
+                    return flag2;
+                })
+                return correct;
+            }
+        }
+
+        function judgeRequest() {
+            if (judge()) {
+                var json = JSON.stringify({
+                    'id': Draw.id,
+                    'nextURL': Draw.nextURL
                 });
-                return flag2;
-            })
-            return correct;
+                conn.send(json);
+                console.log("正解です。次の問題に進みます");
+                setTimeout(function() {
+                    window.location.href = Draw.nextURL;
+                }, 5000);
+
+            }
         }
 
         function undoDraw() {

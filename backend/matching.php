@@ -1,5 +1,6 @@
 <?php
 session_start();
+$_SESSION['QStack'] = [];
 if (isset($_GET["mode"])) {
     $_SESSION["mode"] = $_GET["mode"];
     header('Location: ../matching.php');
