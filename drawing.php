@@ -1,6 +1,6 @@
 <?php
 session_start();
-if ($_GET['currentQNum']) {
+if (isset($_GET['currentQNum'])) {
     $_SESSION['currentQNum'] = $_GET['currentQNum'];
 }
 ?>
@@ -31,15 +31,21 @@ if ($_GET['currentQNum']) {
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="drawing.js"></script>
         <script>
+        console.log(<?php echo $_SESSION['score']; ?>);
+        console.log(<?php echo $_SESSION['startT']; ?>);
+        var startT;
+        var endT;
         var iniSetFlag = false;
         var wsFlag = false;
         var stage = acgraph.create('stage');
         var Draw = new drawing(stage);
         var xhr = new XMLHttpRequest();
+        var xhrb = new XMLHttpRequest();
+        var xhrc = new XMLHttpRequest();
         xhr.open('POST', 'backend/iniSet.php', true);
-        xhr.responseType = 'json';
         xhr.setRequestHeader('content-type',
             'application/x-www-form-urlencoded;charset=UTF-8');
+        xhr.responseType = 'json';
         xhr.send(null);
         xhr.onreadystatechange = function() {
             if (xhr.status == 200 && xhr.readyState == 4) {
@@ -58,7 +64,16 @@ if ($_GET['currentQNum']) {
                 console.log("addFigureStack = > " + Draw.addFigureStack);
                 $('#QNum').text("第" + Draw.currentQNum + "問目");
                 $('#Qtext').text(Draw.Qtext);
-
+                xhrb.open('POST', 'backend/score.php', true);
+                xhrb.setRequestHeader('content-type',
+                    'application/x-www-form-urlencoded;charset=UTF-8');
+                var t = new Date();
+                console.log(t.getTime() / 1000);
+                xhrb.send("score=" + encodeURIComponent(JSON.stringify({
+                    "startT": parseInt(t.getTime() / 1000),
+                    "diff": Draw.Qdiff,
+                    "judge_result": null
+                })));
             }
         };
 
@@ -79,11 +94,11 @@ if ($_GET['currentQNum']) {
 
         function changeTurn() {
             if (iniSetFlag && wsFlag && Draw.turnFlag == 1) {
-                var xhr2 = new XMLHttpRequest();
-                xhr2.open('POST', 'backend/changeTurn.php', true);
-                xhr2.setRequestHeader('content-type',
+                xhrc.open('POST', 'backend/changeTurn.php', true);
+                xhrc.setRequestHeader('content-type',
                     'application/x-www-form-urlencoded;charset=UTF-8');
                 var array = {
+                    'changeTurn': true,
                     'id': Draw.id,
                     'addLines': Draw.addLines,
                     'addCircles': Draw.addCircles,
@@ -91,14 +106,22 @@ if ($_GET['currentQNum']) {
                 }
                 console.log(array);
                 var json = JSON.stringify(array);
-                xhr2.send("json=" + encodeURIComponent(json));
+                xhrc.send("json=" + encodeURIComponent(json));
                 conn.send(json);
+                //window.location.href = "drawing.php";
+            }
+        }
+        xhrc.onreadystatechange = function() {
+            if (xhrc.status == 200 && xhrc.readyState == 4) {
+                console.log(xhrc.response);
                 window.location.href = "drawing.php";
             }
         }
 
         function countDown(sec = 5) {
-            if (Draw.nextURL == "result.html") sec = 0;
+            console.log(startT);
+            console.log(endT);
+            if (Draw.nextURL == "result.php") sec = 0;
             $("#judge_result").text("正解です。次の問題へ進みます。");
             $("#judge_result").css("color", "blue");
             setTimeout(function() {
@@ -113,20 +136,26 @@ if ($_GET['currentQNum']) {
         conn.onmessage = function(e) {
             data = JSON.parse(e.data);
             if (data['id'] == Draw.partnerID) {
-                if (data['nextURL']) {
-                    countDown();
-                } else {
-                    var xhr2 = new XMLHttpRequest();
-                    xhr2.open('POST', 'backend/changeTurn.php', true);
-                    xhr2.setRequestHeader('content-type',
+                if (data['judge'] != undefined) {
+                    var t = new Date();
+                    startT = data['startT'];
+                    endT = data['endT'];
+                    xhrb.open('POST', 'backend/score.php', true);
+                    xhrb.setRequestHeader('content-type',
                         'application/x-www-form-urlencoded;charset=UTF-8');
-                    xhr2.send("afs=" + encodeURIComponent(e.data));
-                    xhr2.onreadystatechange = function() {
-                        if (xhr2.status == 200 && xhr2.readyState == 4) {
-                            console.log(xhr2.response);
-                            window.location.href = "drawing.php";
-                        }
-                    }
+                    xhrb.send("score=" + encodeURIComponent(JSON.stringify({
+                        "startT": startT,
+                        "endT": endT,
+                        "diff": Draw.Qdiff,
+                        "judge_result": data['judge']
+                    })));
+                    if (data['judge'] == 1) countDown();
+                    else window.location.href = "drawing.php";
+                } else if (data['changeTurn']) {
+                    xhrc.open('POST', 'backend/changeTurn.php', true);
+                    xhrc.setRequestHeader('content-type',
+                        'application/x-www-form-urlencoded;charset=UTF-8');
+                    xhrc.send("afs=" + encodeURIComponent(e.data));
                 }
             }
         };
@@ -167,16 +196,38 @@ if ($_GET['currentQNum']) {
         }
 
         function judgeRequest() {
-            if (judge()) {
+            if (iniSetFlag && wsFlag && Draw.turnFlag == 1) {
+                var result = 0;
+                var t = new Date();
+                startT = <?php echo $_SESSION['startT']; ?>;
+                endT = parseInt(t.getTime() / 1000);
+                console.log(startT);
+                console.log(endT);
+                if (judge()) {
+                    result = 1;
+                } else {
+                    $("#judge_result").text("不正解です。もう一度頑張りましょう");
+                    $("#judge_result").css("color", "red");
+                }
                 var json = JSON.stringify({
+                    'judge': result,
                     'id': Draw.id,
-                    'nextURL': Draw.nextURL
+                    'nextURL': Draw.nextURL,
+                    'startT': startT,
+                    'endT': endT
                 });
                 conn.send(json);
-                countDown();
-            } else {
-                $("#judge_result").text("不正解です。もう一度頑張りましょう");
-                $("#judge_result").css("color", "red");
+                xhrb.open('POST', 'backend/score.php', true);
+                xhrb.setRequestHeader('content-type',
+                    'application/x-www-form-urlencoded;charset=UTF-8');
+                xhrb.send("score=" + encodeURIComponent(JSON.stringify({
+                    "diff": Draw.Qdiff,
+                    "judge_result": result,
+                    'startT': startT,
+                    'endT': endT
+                })));
+                if (result == 1) countDown();
+                else window.location.href = "drawing.php";
             }
         }
 

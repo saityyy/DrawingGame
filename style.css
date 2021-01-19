@@ -32,6 +32,22 @@ body {
 #judge_result {
   font-size: 50px;
 }
+.result_page {
+  text-align: center;
+}
+.result_page h1 {
+  font-size: 60px;
+  margin-top: 50px;
+  margin-bottom: 100px;
+}
+table {
+  margin: 3px auto;
+  font-size: 30px;
+}
+td {
+  font-size: 40px;
+  padding: 5px 20px;
+}
 .button {
   margin: 20px;
   display: inline-block;

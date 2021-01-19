@@ -7,7 +7,7 @@ $name = $_SESSION["username"];
 $id = $_SESSION["id"];
 $partnerID = $_SESSION["partnerID"];
 $partnerName = $_SESSION["partnerName"];
-$maxQNum = 3; //問題数
+$maxQNum = 1; //問題数
 if ($mode == 0) {
     $lineID = $partnerID;
     $circleID = $id;
@@ -75,7 +75,7 @@ $Qtext = $fet[0]['text'];
 $Qdiff = $fet[0]['difficulty'];
 $nextURL = "drawing.php?currentQNum=" . ($_SESSION['currentQNum'] + 1);
 if (count($_SESSION["QStack"]) == 0) {
-    $nextURL = "result.html";
+    $nextURL = "result.php";
 }
 $array = [
     'mode' => $mode,

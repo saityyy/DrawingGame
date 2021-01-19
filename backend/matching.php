@@ -1,7 +1,9 @@
 <?php
 session_start();
-$maxQNum = 3; //問題数
+$maxQNum = 1; //問題数
 $_SESSION['QStack'] = [];
+$_SESSION['score'] = 0;
+$_SESSION['startT'] = 0;
 if (isset($_GET["mode"])) {
     $_SESSION["mode"] = $_GET["mode"];
     header('Location: ../matching.html');
