@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 session_start();
+$_SESSION['maxQNum'] = 3;
 $pdo = new PDO("sqlite:data.sqlite");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 if (isset($_SESSION['id'])) {

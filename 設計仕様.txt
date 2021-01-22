@@ -1,0 +1,85 @@
+github　＝＞　https://github.com/saityyy/DrawingGame
+・セッション変数(phpのスーパーグローバル変数)
+id　自分自身のユーザーを識別する
+username　自分の名前
+partnerID　マッチングされたパートナーのID
+partnerName　パートナーの名前
+mode　コンパスか定規か（コンパス→0 定規→1）
+maxQNum 出題する問題の数
+QStack 問題IDが格納された配列
+CurrentQNum 現在の問題番号（現在何問目の問題か）
+QNum {CurrentQNum}問目における問題ID
+turnFlag ターン権を所有しているか（１＝＞自分のターン　０＝＞相手のターン）
+score すべての問題が終わるまで、各問における算出されたスコアを累積で足していく
+startT 各問において問題をとき始めた時間を記録する。
+正誤判定して正解していれば、正解した時間からstartTを引けば、その問題にどのくらい時間を要したかがわかる
+
+・drawingクラス内におけるjsの変数
+mode
+id
+partnerID
+partnerName
+turnFlag
+CurrentQNum
+↑これらは前述と同様の機能を果たすjsの変数
+drawLines,drawCircles　前提として与えられている図形データ配列
+ansLines,ansCircles　答えの図形データ配列
+addLines,addCircles　各ユーザーが作図の過程で付け加える図形データ配列
+addFigureStack　各ユーザーが追加した図形の種類を格納している配列。
+例えば、コンパス、コンパス、定規、コンパスの順に入力していたとすると配列の中身は[0,0,1,0]となる
+この変数はundoしたときに次に取り消す図形データが円か線かを識別するために存在する。
+ユーザーが図形を入力＝＞push(1 or 0)
+ユーザーがundoボタンを押す＝＞pop() (末尾から値を抜き取って線か円でどちらを消すかを識別)
+Qtext　問題文
+Qdiff 問題の難しさ（1~10）
+nextURL　正解したときに次に遷移するページ
+clickX,clickY　一回目のクリックにおいてクリックした座標を格納する。
+一回目のクリックがされていないときは-1としている
+
+・DBについて
+users => id,name,password,mode,partnerID,turnFlag
+partnerIDはプレイ中だと相手のIDが格納される。
+マッチング待機中は0になって、その情報からマッチング相手を探索する。
+それ以外は－１、つまりオフライン状態
+turnFlagとmodeの仕様はセッション変数と同じ（int型）
+drawLines => id,QNumber x1 y1 x2 y2
+drawCircles => id,QNumber,x1,y1,random
+ansLines => id,QNumber,startX,startY grad length
+最終的に始点x,yと傾きと長さにしました。grad(傾き)は角度をtan()に代入したときの値
+例えば、(0,0)から(1,1)に引いた線分は始点を(0,0)としたとき(0,0,1,1.41(root(2)))
+ansCircles => id,QNumber x1,y1,r
+addLines => drawerID,x1,y1,x2,y2
+addCircles => drawerID,x1,y1,x2,y2
+drawerIDはその図形を書いたユーザーのIDを指します。
+実際にこのDBにはプレイしてる全ユーザーの付け足したデータが入れられるので
+各チームの書いた図形データを一意的に定める必要がある。
+questions => QNumber text difficulty 
+textは問題文、difficultyは難易度（１～１０）
+ranking => id,userA,userB,score
+
+・関数、メソッドについて 
+
+drawing.js
+setData()
+=>drawing.phpを読み込むたびに初期設定を設定する
+Line() => 線を引く。引数は[x1,y1,x2,y2]のフォーマットの配列
+Circle() => 円を描く。引数は[x1,y1,r]のフォーマットの配列
+dist() => ２点間の長さを算出
+mouseMove()　=>　マウスを動かしたときの挙動。
+mouseClick() => マウスをクリックしたときの挙動。
+judgeLines() => inp(input)とans(answer)の答えを比べて真偽値を返す
+judgeCircle() =>同上
+
+drawing.php
+draw() => 描画する
+
+
+
+
+
+
+
+
+
+
+

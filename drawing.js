@@ -34,6 +34,7 @@ class drawing {
         this.stage.circle(xy[0], xy[1], xy[2]).stroke(col, weight) 
     }
     dist(dx, dy) { return parseInt(Math.sqrt(dx * dx + dy * dy)); }
+
     mouseMove(cx2, cy2) {
         if (this.clickX != -1 && this.clickY != -1) {
             if (this.mode==1) {

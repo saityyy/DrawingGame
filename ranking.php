@@ -10,7 +10,7 @@ $topTen = $fet->fetchAll();
 
     <head>
         <meta charset="utf-8" />
-        <title>結果</title>
+        <title>結果発表</title>
         <link rel="stylesheet" href="style.css" />
     </head>
 

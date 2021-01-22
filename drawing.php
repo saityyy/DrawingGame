@@ -3,6 +3,9 @@ session_start();
 if (isset($_GET['currentQNum'])) {
     $_SESSION['currentQNum'] = $_GET['currentQNum'];
 }
+if (isset($_GET['judge'])) {
+    $NoRightFlag = true;
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -19,7 +22,13 @@ if (isset($_GET['currentQNum'])) {
             <h1 id="QNum"></h1>
             <h2 id="Qtext"></h2>
         </div>
-        <p id=judge_result></p>
+        <p id=judge_result>
+            <?php
+        if ($NoRightFlag) {
+            echo '不正解です。頑張りましょう。';
+        }
+        ?>
+        </p>
         <div id="stage" style="width:1200px;height:700px;border:solid 3px #000">
         </div>
         <div id=options>
@@ -39,17 +48,17 @@ if (isset($_GET['currentQNum'])) {
         var wsFlag = false;
         var stage = acgraph.create('stage');
         var Draw = new drawing(stage);
-        var xhr = new XMLHttpRequest();
-        var xhrb = new XMLHttpRequest();
-        var xhrc = new XMLHttpRequest();
-        xhr.open('POST', 'backend/iniSet.php', true);
-        xhr.setRequestHeader('content-type',
+        var XHR_iniset = new XMLHttpRequest();
+        var XHR_score = new XMLHttpRequest();
+        var XHR_turn = new XMLHttpRequest();
+        XHR_iniset.open('POST', 'backend/iniSet.php', true);
+        XHR_iniset.setRequestHeader('content-type',
             'application/x-www-form-urlencoded;charset=UTF-8');
-        xhr.responseType = 'json';
-        xhr.send(null);
-        xhr.onreadystatechange = function() {
-            if (xhr.status == 200 && xhr.readyState == 4) {
-                var res = xhr.response;
+        XHR_iniset.responseType = 'json';
+        XHR_iniset.send(null);
+        XHR_iniset.onreadystatechange = function() {
+            if (XHR_iniset.status == 200 && XHR_iniset.readyState == 4) {
+                var res = XHR_iniset.response;
                 console.log(res);
                 Draw.setData(res);
                 draw();
@@ -64,12 +73,13 @@ if (isset($_GET['currentQNum'])) {
                 console.log("addFigureStack = > " + Draw.addFigureStack);
                 $('#QNum').text("第" + Draw.currentQNum + "問目");
                 $('#Qtext').text(Draw.Qtext);
-                xhrb.open('POST', 'backend/score.php', true);
-                xhrb.setRequestHeader('content-type',
+                //startTをsessionに記録するためにAjaxでpost送信
+                XHR_score.open('POST', 'backend/score.php', true);
+                XHR_score.setRequestHeader('content-type',
                     'application/x-www-form-urlencoded;charset=UTF-8');
                 var t = new Date();
                 console.log(t.getTime() / 1000);
-                xhrb.send("score=" + encodeURIComponent(JSON.stringify({
+                XHR_score.send("score=" + encodeURIComponent(JSON.stringify({
                     "startT": parseInt(t.getTime() / 1000),
                     "diff": Draw.Qdiff,
                     "judge_result": null
@@ -94,8 +104,8 @@ if (isset($_GET['currentQNum'])) {
 
         function changeTurn() {
             if (iniSetFlag && wsFlag && Draw.turnFlag == 1) {
-                xhrc.open('POST', 'backend/changeTurn.php', true);
-                xhrc.setRequestHeader('content-type',
+                XHR_turn.open('POST', 'backend/changeTurn.php', true);
+                XHR_turn.setRequestHeader('content-type',
                     'application/x-www-form-urlencoded;charset=UTF-8');
                 var array = {
                     'changeTurn': true,
@@ -106,14 +116,14 @@ if (isset($_GET['currentQNum'])) {
                 }
                 console.log(array);
                 var json = JSON.stringify(array);
-                xhrc.send("json=" + encodeURIComponent(json));
+                XHR_turn.send("json=" + encodeURIComponent(json));
                 conn.send(json);
                 //window.location.href = "drawing.php";
             }
         }
-        xhrc.onreadystatechange = function() {
-            if (xhrc.status == 200 && xhrc.readyState == 4) {
-                console.log(xhrc.response);
+        XHR_turn.onreadystatechange = function() {
+            if (XHR_turn.status == 200 && XHR_turn.readyState == 4) {
+                console.log(XHR_turn.response);
                 window.location.href = "drawing.php";
             }
         }
@@ -128,34 +138,34 @@ if (isset($_GET['currentQNum'])) {
                 window.location.href = Draw.nextURL;
             }, sec * 1000);
         }
-        var conn = new WebSocket('ws://localhost:80');
+        var conn = new WebSocket('ws:localhost:80');
         conn.onopen = function(e) {
             console.log("connection for comment established!");
             wsFlag = true;
         };
         conn.onmessage = function(e) {
             data = JSON.parse(e.data);
+            //パートナーからの通知かどうかをチェック
             if (data['id'] == Draw.partnerID) {
+                //judge関数からのsend()
                 if (data['judge'] != undefined) {
-                    var t = new Date();
-                    startT = data['startT'];
-                    endT = data['endT'];
-                    xhrb.open('POST', 'backend/score.php', true);
-                    xhrb.setRequestHeader('content-type',
+                    XHR_score.open('POST', 'backend/score.php', true);
+                    XHR_score.setRequestHeader('content-type',
                         'application/x-www-form-urlencoded;charset=UTF-8');
-                    xhrb.send("score=" + encodeURIComponent(JSON.stringify({
-                        "startT": startT,
-                        "endT": endT,
+                    XHR_score.send("score=" + encodeURIComponent(JSON.stringify({
                         "diff": Draw.Qdiff,
-                        "judge_result": data['judge']
+                        "judge_result": data['judge'],
+                        "Time": data['Time']
                     })));
                     if (data['judge'] == 1) countDown();
-                    else window.location.href = "drawing.php";
-                } else if (data['changeTurn']) {
-                    xhrc.open('POST', 'backend/changeTurn.php', true);
-                    xhrc.setRequestHeader('content-type',
+                    else window.location.href = "drawing.php?judge=0";
+                }
+                //changeTurn関数からのsend()
+                else if (data['changeTurn']) {
+                    XHR_turn.open('POST', 'backend/changeTurn.php', true);
+                    XHR_turn.setRequestHeader('content-type',
                         'application/x-www-form-urlencoded;charset=UTF-8');
-                    xhrc.send("afs=" + encodeURIComponent(e.data));
+                    XHR_turn.send("afs=" + encodeURIComponent(e.data));
                 }
             }
         };
@@ -201,33 +211,26 @@ if (isset($_GET['currentQNum'])) {
                 var t = new Date();
                 startT = <?php echo $_SESSION['startT']; ?>;
                 endT = parseInt(t.getTime() / 1000);
-                console.log(startT);
-                console.log(endT);
-                if (judge()) {
-                    result = 1;
-                } else {
-                    $("#judge_result").text("不正解です。もう一度頑張りましょう");
-                    $("#judge_result").css("color", "red");
-                }
+                var Time = endT - startT;
+                console.log(Time)
+                if (judge()) result = 1;
                 var json = JSON.stringify({
                     'judge': result,
                     'id': Draw.id,
                     'nextURL': Draw.nextURL,
-                    'startT': startT,
-                    'endT': endT
+                    'Time': Time
                 });
                 conn.send(json);
-                xhrb.open('POST', 'backend/score.php', true);
-                xhrb.setRequestHeader('content-type',
+                XHR_score.open('POST', 'backend/score.php', true);
+                XHR_score.setRequestHeader('content-type',
                     'application/x-www-form-urlencoded;charset=UTF-8');
-                xhrb.send("score=" + encodeURIComponent(JSON.stringify({
+                XHR_score.send("score=" + encodeURIComponent(JSON.stringify({
                     "diff": Draw.Qdiff,
                     "judge_result": result,
-                    'startT': startT,
-                    'endT': endT
+                    "Time": Time
                 })));
                 if (result == 1) countDown();
-                else window.location.href = "drawing.php";
+                else window.location.href = "drawing.php?judge=0";
             }
         }
 

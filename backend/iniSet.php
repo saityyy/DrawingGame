@@ -7,7 +7,7 @@ $name = $_SESSION["username"];
 $id = $_SESSION["id"];
 $partnerID = $_SESSION["partnerID"];
 $partnerName = $_SESSION["partnerName"];
-$maxQNum = 1; //問題数
+$maxQNum = $_SESSION['maxQNum']; //問題数
 if ($mode == 0) {
     $lineID = $partnerID;
     $circleID = $id;
