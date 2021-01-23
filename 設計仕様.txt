@@ -67,12 +67,28 @@ Circle() => 円を描く。引数は[x1,y1,r]のフォーマットの配列
 dist() => ２点間の長さを算出
 mouseMove()　=>　マウスを動かしたときの挙動。
 mouseClick() => マウスをクリックしたときの挙動。
-judgeLines() => inp(input)とans(answer)の答えを比べて真偽値を返す
+judgeLines() => inp(input)とans(answer)の座標や長さなどを比べて一致してたらtrueを返す
 judgeCircle() =>同上
 
 drawing.php
 draw() => 描画する
+changeTurn() => ターン交代するときの関数
+初期設定済み、ウェブソケットコネクト済み、自分のターンであれば反応する
+changeTurn.phpに必要な情報を送信
+自分のターン中に更新した図形データを相手にウェブソケットで送信する
+countDown() => 正解したときにメッセージを表示。指定秒数経過後、次のページへ遷移
+conn.onmessage() => ウェブソケットが送られたときに呼ばれる。
+judge() => 正誤判定を行う
+judgeRequest()　=> judge()の真偽値で決められた処理をする
+undoDraw() => addFigureStackを元にundo処理を行う
 
+drawing.phpからリクエストを送るファイル
+iniset.php 初期設定をSESSION,DBから取得し、フロントに返す
+changeTurn.php　ターンを交代する手続きをする（DB書き換え、sessionに代入など）
+score.php　スタートした時間を記録する。正解、不正解したときにスコアを記録していく。
+
+result.php => 結果表示画面
+ranking.php => ランキングを表示 
 
 
 

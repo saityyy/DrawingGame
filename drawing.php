@@ -197,7 +197,7 @@ if (isset($_GET['judge'])) {
 
         function judgeRequest() {
             if (iniSetFlag && wsFlag && Draw.turnFlag == 1) {
-                var result = 0;
+                var result = 0; //合ってたら１、間違ってたら０
                 var t = new Date();
                 startT = <?php echo $_SESSION['startT']; ?>;
                 endT = parseInt(t.getTime() / 1000);
