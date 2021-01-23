@@ -47,7 +47,7 @@ $allUsers = $fet[0][0];
             <h1 id="score"><?php echo $score . "点" ?></h1>
             <h1 id="rank"><?php echo $rank . "位/" . $allUsers ?></h1>
             <input type="button" value="ランキングを見る" onclick="location.href='ranking.php'" class="button">
-            <input type="button" value="トップページに戻る" onclick="location.href='top.html'" class="button">
+            <input type="button" value="トップページに戻る" onclick="location.href='top.php'" class="button">
         </div>
     </body>
 

@@ -70,7 +70,6 @@ $_SESSION["mode"] = $_GET["mode"];
                 //mode0ユーザーからマッチングが成功したことをWebSocketで伝えられる
                 conn.onmessage = function(e) {
                     var temp = JSON.parse(e.data);
-                    console.log(e.data);
                     //送ってきた相手が本当にあなたのパートナーかを検証
                     //＝＞mode0ユーザが送ってきたマッチング相手のIDが自分のIDであればtrue
                     if (temp["partnerID"] == id) {

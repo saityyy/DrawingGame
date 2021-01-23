@@ -30,18 +30,8 @@ $topTen = $fet->fetchAll();
                 ?>
                 </tbody>
             </table>
-            <input type="button" value="トップページに戻る" onclick="showTop()" class="button">
+            <input type="button" value="トップページに戻る" onclick="location.href='top.php'" class="button">
         </div>
-        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-        <script>
-        function showRanking() {
-            window.location.href = "ranking.php";
-        }
-
-        function showTop() {
-            window.location.href = "top.html";
-        }
-        </script>
     </body>
 
 </html>

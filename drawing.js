@@ -47,7 +47,6 @@ class drawing {
                 for(var i=0;i<this.addCircles.length;i++){
                     var xy=this.addCircles[i];
                     if(parseInt(xy[2])+5>R && xy[2]-5<R){
-                        console.log(xy);
                         this.Circle(xy,"#f00",8);
                         this.Circle([this.clickX, this.clickY, R],"f00",8);
                     }
@@ -80,23 +79,17 @@ class drawing {
         var inpG=parseInt(inp[2]);
         var inpL=parseInt(inp[3]);
         flag = flag && inpL > (ansL - 20);
-        //console.log("length_check -> " + flag);
         //angle_check
         var ans_ang = Math.atan(ansG);
         var inp_ang = Math.atan(inpG);
         flag=flag && (ans_ang - 0.1 < inp_ang);
         flag=flag && (inp_ang < ans_ang + 0.1);
-        //console.log("ans_ang => "+ans_ang+"  ,  inp_ang => "+inp_ang);
-        //console.log(ans_ang - 0.02 + " < " + inp_ang + " < " + ans_ang + 0.02);
-        console.log("angle_check -> " + flag);
         //startPoint_check
         if(ansX!=-1&&ansY!=-1){
             flag=flag && ((ansX- 20) < inpX);
             flag=flag && (inpX < (ansX + 20));
             flag=flag && ((ansY - 20 )< inpY);
             flag=flag && (inpY < (ansY + 20));
-            console.log("ans => "+ans+"  ,  inp => "+inp);
-            console.log("startPoint_check -> " + flag);
         }
         return flag;
     }

@@ -40,8 +40,11 @@ if (isset($_GET['judge'])) {
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="drawing.js"></script>
         <script>
-        console.log(<?php echo $_SESSION['score']; ?>);
-        console.log(<?php echo $_SESSION['startT']; ?>);
+        var t = new Date();
+        console.log(<?php echo "スコア => " . $_SESSION['score']; ?>);
+        var s = <?php echo $_SESSION['startT']; ?>;
+        console.log(s)
+        console.log("経過時間 => " + String(parseInt(t.getTime() / 1000) - s));
         var startT;
         var endT;
         var iniSetFlag = false;
@@ -70,7 +73,6 @@ if (isset($_GET['judge'])) {
                     $('#turn').text("相手のターンです。");
                     $('#stage').css("opacity", 0.5);
                 }
-                console.log("addFigureStack = > " + Draw.addFigureStack);
                 $('#QNum').text("第" + Draw.currentQNum + "問目");
                 $('#Qtext').text(Draw.Qtext);
                 //startTをsessionに記録するためにAjaxでpost送信
@@ -78,7 +80,6 @@ if (isset($_GET['judge'])) {
                 XHR_score.setRequestHeader('content-type',
                     'application/x-www-form-urlencoded;charset=UTF-8');
                 var t = new Date();
-                console.log(t.getTime() / 1000);
                 XHR_score.send("score=" + encodeURIComponent(JSON.stringify({
                     "startT": parseInt(t.getTime() / 1000),
                     "diff": Draw.Qdiff,
@@ -114,23 +115,19 @@ if (isset($_GET['judge'])) {
                     'addCircles': Draw.addCircles,
                     'addFigureStack': Draw.addFigureStack
                 }
-                console.log(array);
                 var json = JSON.stringify(array);
                 XHR_turn.send("json=" + encodeURIComponent(json));
                 conn.send(json);
-                //window.location.href = "drawing.php";
+                window.location.href = "drawing.php";
             }
         }
         XHR_turn.onreadystatechange = function() {
             if (XHR_turn.status == 200 && XHR_turn.readyState == 4) {
-                console.log(XHR_turn.response);
                 window.location.href = "drawing.php";
             }
         }
 
         function countDown(sec = 5) {
-            console.log(startT);
-            console.log(endT);
             if (Draw.nextURL == "result.php") sec = 0;
             $("#judge_result").text("正解です。次の問題へ進みます。");
             $("#judge_result").css("color", "blue");
@@ -177,16 +174,11 @@ if (isset($_GET['judge'])) {
                 var drawCircles = Draw.addCircles;
                 var linesAns = Draw.ansLines;
                 var circlesAns = Draw.ansCircles;
-                //console.log(drawLines);
-                //console.log(drawCircles);
-                //console.log(linesAns);
-                //console.log(circlesAns);
                 correct = linesAns.every(function lines_check(ans) {
                     //(startX,startY,grad,length)
                     var flag2 = drawLines.some(function line_check(inp) {
                         grad = -(inp[3] - inp[1]) / (inp[2] - inp[0]);
                         leng = Draw.dist(inp[0] - inp[2], inp[1] - inp[3]);
-                        console.log(grad + " , " + leng);
                         var fA = Draw.judgeLine([inp[0], inp[1], grad, leng], ans);
                         var fB = Draw.judgeLine([inp[2], inp[3], grad, leng], ans);
                         return fA || fB;
@@ -194,9 +186,7 @@ if (isset($_GET['judge'])) {
                     return flag2;
                 });
                 correct = correct && circlesAns.every(function circles_check(ans) {
-                    console.log(1);
                     var flag2 = drawCircles.some(function circle_check(inp) {
-                        console.log("inp :" + inp);
                         return Draw.judgeCircle(inp, ans);
                     });
                     return flag2;
@@ -212,7 +202,6 @@ if (isset($_GET['judge'])) {
                 startT = <?php echo $_SESSION['startT']; ?>;
                 endT = parseInt(t.getTime() / 1000);
                 var Time = endT - startT;
-                console.log(Time)
                 if (judge()) result = 1;
                 var json = JSON.stringify({
                     'judge': result,
@@ -236,7 +225,6 @@ if (isset($_GET['judge'])) {
 
         function undoDraw() {
             var Stack = Draw.addFigureStack.pop();
-            console.log(Draw.addFigureStack);
             if (Stack == 0) Draw.addCircles.pop();
             else if (Stack == 1) Draw.addLines.pop();
             stage.rect(0, 0, 1200, 700).fill("#01ff62");
@@ -252,7 +240,6 @@ if (isset($_GET['judge'])) {
         $('#stage').on('click', function(e) {
             if (Draw.turnFlag == 1) {
                 Draw.mouseClick(e.offsetX, e.offsetY);
-                console.log(Draw.addFigureStack);
             }
         });
         </script>
