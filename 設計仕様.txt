@@ -1,4 +1,6 @@
 github　＝＞　https://github.com/saityyy/DrawingGame
+!websocket.phpを実行する。
+
 ・セッション変数(phpのスーパーグローバル変数)
 id　自分自身のユーザーを識別する
 username　自分の名前
