@@ -69,10 +69,10 @@ $_SESSION["mode"] = $_GET["mode"];
                 };
                 //mode0ユーザーからマッチングが成功したことをWebSocketで伝えられる
                 conn.onmessage = function(e) {
-                    var temp = JSON.parse(e.data);
+                    var recData = JSON.parse(e.data);
                     //送ってきた相手が本当にあなたのパートナーかを検証
                     //＝＞mode0ユーザが送ってきたマッチング相手のIDが自分のIDであればtrue
-                    if (temp["partnerID"] == id) {
+                    if (recData["partnerID"] == id) {
                         console.log("receive_success");
                         var xhr2 = new XMLHttpRequest();
                         xhr2.open("POST", "backend/backMatching.php");
@@ -83,7 +83,7 @@ $_SESSION["mode"] = $_GET["mode"];
                         xhr2.send("json=" + encodeURIComponent(e.data));
                         xhr2.onreadystatechange = function() {
                             if (xhr2.status == 200 && xhr2.readyState == 4) {
-                                countDown(temp["name"]);
+                                countDown(recData["name"]);
                             }
                         };
                     }

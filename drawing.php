@@ -41,10 +41,7 @@ if (isset($_GET['judge'])) {
         <script src="drawing.js"></script>
         <script>
         var t = new Date();
-        console.log(<?php echo "スコア => " . $_SESSION['score']; ?>);
         var s = <?php echo $_SESSION['startT']; ?>;
-        console.log(s)
-        console.log("経過時間 => " + String(parseInt(t.getTime() / 1000) - s));
         var startT;
         var endT;
         var iniSetFlag = false;
@@ -62,7 +59,6 @@ if (isset($_GET['judge'])) {
         XHR_iniset.onreadystatechange = function() {
             if (XHR_iniset.status == 200 && XHR_iniset.readyState == 4) {
                 var res = XHR_iniset.response;
-                console.log(res);
                 Draw.setData(res);
                 draw();
                 iniSetFlag = true;
@@ -167,6 +163,7 @@ if (isset($_GET['judge'])) {
             }
         };
 
+        //入力したすべての図形のデータから正誤判定を行う
         function judge() {
             if (iniSetFlag && wsFlag && Draw.turnFlag == 1) {
                 var correct;
@@ -174,9 +171,9 @@ if (isset($_GET['judge'])) {
                 var drawCircles = Draw.addCircles;
                 var linesAns = Draw.ansLines;
                 var circlesAns = Draw.ansCircles;
-                correct = linesAns.every(function lines_check(ans) {
+                correct = linesAns.every(function lines_check(ans) {//全てtrueであればtrueを返す
                     //(startX,startY,grad,length)
-                    var flag2 = drawLines.some(function line_check(inp) {
+                    var flag2 = drawLines.some(function line_check(inp) {//一つでもtrueがあればtrueを返す
                         grad = -(inp[3] - inp[1]) / (inp[2] - inp[0]);
                         leng = Draw.dist(inp[0] - inp[2], inp[1] - inp[3]);
                         var fA = Draw.judgeLine([inp[0], inp[1], grad, leng], ans);
